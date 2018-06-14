@@ -1,6 +1,7 @@
 module Test.Chord where
 
 import Prelude
+import Data.Maybe (Maybe(..))
 import Data.Set (fromFoldable)
 import Test.Spec (Spec, describe, it)
 import Test.Spec.Assertions (shouldEqual)
@@ -37,3 +38,19 @@ chordSpec = do
   describe "transpose" do
     it "a major third" do
       C.transposeChord (C.generateChord C.majorChord N.C) I.majorThird `shouldEqual` { rootNote: N.E, chord: fromFoldable [N.E, N.GsAb, N.B] }
+  describe "inversions" do
+    it "get major third" do
+      C.getInversionBase (C.generateChord C.majorChord N.C) I.majorThird `shouldEqual` Just N.E
+    it "minor seventh" do
+      C.getInversionBase (C.generateChord C.dom7thChord N.C) I.minorSeventh `shouldEqual` Just N.AsBb
+    it "nothing when absent" do
+      C.getInversionBase (C.generateChord C.majorChord N.C) I.fourth `shouldEqual` Nothing
+  describe "additions / removals" do
+    it "adds flat ninth" do
+      C.addInterval (C.generateChord C.dom7thChord N.C) I.minorNinth `shouldEqual` { rootNote: N.C
+                                                                                   , chord: fromFoldable [N.C, N.E, N.G, N.AsBb, N.CsDb]
+                                                                                   }
+    it "removes fifth" do
+      C.removeInterval (C.generateChord C.dom7thChord N.C) I.fifth `shouldEqual` { rootNote: N.C
+                                                                                 , chord: fromFoldable [N.C, N.E, N.AsBb]
+                                                                                 }

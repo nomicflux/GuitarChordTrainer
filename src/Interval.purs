@@ -48,4 +48,19 @@ majorSeventh :: Interval
 majorSeventh = 11
 
 octave :: Interval
-octave = 0
+octave = sameNote
+
+minorNinth :: Interval
+minorNinth = minorSecond
+
+majorNinth :: Interval
+majorNinth = majorSecond
+
+eleventh :: Interval
+eleventh = fourth
+
+minorThirteenth :: Interval
+minorThirteenth = minorSixth
+
+majorThirteenth :: Interval
+majorThirteenth = majorSixth

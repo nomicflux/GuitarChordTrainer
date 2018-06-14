@@ -1,6 +1,8 @@
 module Chord where
 
 import Data.List (List(..), fromFoldable)
+import Data.Maybe (Maybe(..))
+import Data.Ord (class Ord)
 import Data.Set (Set)
 import Data.Set as S
 
@@ -74,3 +76,21 @@ transposeChord :: ThisChord -> Interval -> ThisChord
 transposeChord chord interval = { rootNote: incNoteBy chord.rootNote interval
                                 , chord: S.map (\n -> incNoteBy n interval) chord.chord
                                 }
+
+retrieve :: forall a. Ord a => a -> Set a -> Maybe a
+retrieve a set = if S.member a set then Just a else Nothing
+
+getInversionBase :: ThisChord -> Interval -> Maybe Note
+getInversionBase chord interval = retrieve (incNoteBy chord.rootNote interval) chord.chord
+
+addInterval :: ThisChord -> Interval -> ThisChord
+addInterval chord interval = chord { chord = S.insert (incNoteBy chord.rootNote interval) chord.chord }
+
+addNote :: ThisChord -> Note -> ThisChord
+addNote chord note = chord { chord = S.insert note chord.chord }
+
+removeInterval :: ThisChord -> Interval -> ThisChord
+removeInterval chord interval = chord { chord = S.delete (incNoteBy chord.rootNote interval) chord.chord }
+
+removeNote :: ThisChord -> Note -> ThisChord
+removeNote chord note = chord { chord = S.delete note chord.chord }
