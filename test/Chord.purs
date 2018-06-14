@@ -9,29 +9,39 @@ import Test.Spec.Reporter.Console (consoleReporter)
 import Test.Spec.Runner (run)
 
 import Chord as C
+import Note as N
 
 chordTests :: Effect Unit
 chordTests = run [consoleReporter] do
+  deescribe "note distance" do
+    it "same note" do
+      (N.noteDistance N.A N.A) `shouldEqual` 0
+    it "half step" do
+      (N.noteDistance N.A N.AsBb) `shouldEqual` 1
+    it "fifth" do
+      (N.noteDistance N.A N.E) `shouldEqual` 7
+    it "major seventh" do
+      (N.noteDistance N.C N.B) `shouldEqual` 11
   describe "chords" do
     it "major" do
-      (C.generateChord C.majorChord C.C) `shouldEqual` (fromFoldable [C.C, C.E, C.G])
+      (C.generateChord C.majorChord N.C) `shouldEqual` (fromFoldable [N.C, N.E, N.G])
     it "minor" do
-      (C.generateChord C.minorChord C.C) `shouldEqual` (fromFoldable [C.C, C.DsEb, C.G])
+      (C.generateChord C.minorChord N.C) `shouldEqual` (fromFoldable [N.C, N.DsEb, N.G])
     it "diminished" do
-      (C.generateChord C.diminishedChord C.C) `shouldEqual` (fromFoldable [C.C, C.DsEb, C.FsGb])
+      (C.generateChord C.diminishedChord N.C) `shouldEqual` (fromFoldable [N.C, N.DsEb, N.FsGb])
     it "augmented" do
-      (C.generateChord C.augmentedChord C.C) `shouldEqual` (fromFoldable [C.C, C.E, C.GsAb])
+      (C.generateChord C.augmentedChord N.C) `shouldEqual` (fromFoldable [N.C, N.E, N.GsAb])
     it "dom7thChord" do
-      (C.generateChord C.dom7thChord C.C) `shouldEqual` (fromFoldable [C.C, C.E, C.G, C.AsBb])
+      (C.generateChord C.dom7thChord N.C) `shouldEqual` (fromFoldable [N.C, N.E, N.G, N.AsBb])
     it "maj7thChord" do
-      (C.generateChord C.major7thChord C.C) `shouldEqual` (fromFoldable [C.C, C.E, C.G, C.B])
+      (C.generateChord C.major7thChord N.C) `shouldEqual` (fromFoldable [N.C, N.E, N.G, N.B])
     it "min7thChord" do
-      (C.generateChord C.minor7thChord C.C) `shouldEqual` (fromFoldable [C.C, C.DsEb, C.G, C.AsBb])
+      (C.generateChord C.minor7thChord N.C) `shouldEqual` (fromFoldable [N.C, N.DsEb, N.G, N.AsBb])
     it "majmin7thChord" do
-      (C.generateChord C.majorMinor7thChord C.C) `shouldEqual` (fromFoldable [C.C, C.DsEb, C.G, C.B])
+      (C.generateChord C.majorMinor7thChord N.C) `shouldEqual` (fromFoldable [N.C, N.DsEb, N.G, N.B])
     it "halfdimChord" do
-      (C.generateChord C.halfDiminishedChord C.C) `shouldEqual` (fromFoldable [C.C, C.DsEb, C.FsGb, C.AsBb])
+      (C.generateChord C.halfDiminishedChord N.C) `shouldEqual` (fromFoldable [N.C, N.DsEb, N.FsGb, N.AsBb])
     it "dim7thChord" do
-      (C.generateChord C.diminished7thChord C.C) `shouldEqual` (fromFoldable [C.C, C.DsEb, C.FsGb, C.A])
+      (C.generateChord C.diminished7thChord N.C) `shouldEqual` (fromFoldable [N.C, N.DsEb, N.FsGb, N.A])
     it "aug7thChord" do
-      (C.generateChord C.augmented7thChord C.C) `shouldEqual` (fromFoldable [C.C, C.E, C.GsAb, C.AsBb])
+      (C.generateChord C.augmented7thChord N.C) `shouldEqual` (fromFoldable [N.C, N.E, N.GsAb, N.AsBb])

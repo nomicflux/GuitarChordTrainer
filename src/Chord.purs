@@ -3,59 +3,8 @@ module Chord where
 import Prelude
 import Data.List (List(..), fromFoldable)
 
-data Note = A | AsBb | B | C | CsDb | D | DsEb | E | F | FsGb | G | GsAb
-
-derive instance eqNote :: Eq Note
-
-instance showNote :: Show Note where
-  show A = "A"
-  show AsBb = "A#/Bb"
-  show B = "B"
-  show C = "C"
-  show CsDb = "C#/Db"
-  show D = "D"
-  show DsEb = "D#/Eb"
-  show E = "E"
-  show F = "F"
-  show FsGb = "F#/Gb"
-  show G = "G"
-  show GsAb = "G#/Ab"
-
-incNote :: Note -> Note
-incNote A = AsBb
-incNote AsBb = B
-incNote B = C
-incNote C = CsDb
-incNote CsDb = D
-incNote D = DsEb
-incNote DsEb = E
-incNote E = F
-incNote F = FsGb
-incNote FsGb = G
-incNote G = GsAb
-incNote GsAb = A
-
-decNote :: Note -> Note
-decNote A = GsAb
-decNote AsBb = A
-decNote B = AsBb
-decNote C = B
-decNote CsDb = C
-decNote D = CsDb
-decNote DsEb = D
-decNote E = DsEb
-decNote F = E
-decNote FsGb = F
-decNote G = FsGb
-decNote GsAb = G
-
-incNoteBy :: Note -> Int -> Note
-incNoteBy note 0 = note
-incNoteBy note n = incNoteBy (incNote note) (n - 1)
-
-decNoteBy :: Note -> Int -> Note
-decNoteBy note 0 = note
-decNoteBy note n = decNoteBy (decNote note) (n - 1)
+import Note (Note(..))
+import Tagged (Tagged(..))
 
 data Chord = Chord (List Int)
 
@@ -91,8 +40,6 @@ diminished7thChord = Chord (fromFoldable [3, 3, 3])
 
 augmented7thChord :: Chord
 augmented7thChord = Chord (fromFoldable [4, 4, 2])
-
-data Tagged a = Tagged String a
 
 allChords :: List (Tagged Chord)
 allChords = fromFoldable [ Tagged "Major" majorChord
