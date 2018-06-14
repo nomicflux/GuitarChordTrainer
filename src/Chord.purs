@@ -1,5 +1,6 @@
 module Chord where
 
+import Data.Array as A
 import Data.List (List(..), fromFoldable)
 
 import Interval (Interval)
@@ -42,22 +43,28 @@ diminished7thChord = Chord (fromFoldable [I.minorThird, I.minorThird, I.minorThi
 augmented7thChord :: Chord
 augmented7thChord = Chord (fromFoldable [I.majorThird, I.majorThird, I.majorSecond])
 
-allChords :: List (Tagged Chord)
-allChords = fromFoldable [ Tagged "Major" majorChord
-                         , Tagged "Minor" minorChord
-                         , Tagged "Diminished" diminishedChord
-                         , Tagged "Augmented" augmentedChord
-                         , Tagged "Dom 7th" dom7thChord
-                         , Tagged "Maj 7th" major7thChord
-                         , Tagged "Min 7th" minor7thChord
-                         , Tagged "Maj Min 7th" majorMinor7thChord
-                         , Tagged "Half Diminished" halfDiminishedChord
-                         , Tagged "Diminished 7th" diminished7thChord
-                         , Tagged "Augmented 7th" augmented7thChord
-                         ]
+allChords :: Array (Tagged Chord)
+allChords = [ Tagged "Major" majorChord
+            , Tagged "Minor" minorChord
+            , Tagged "Diminished" diminishedChord
+            , Tagged "Augmented" augmentedChord
+            , Tagged "Dom 7th" dom7thChord
+            , Tagged "Maj 7th" major7thChord
+            , Tagged "Min 7th" minor7thChord
+            , Tagged "Maj Min 7th" majorMinor7thChord
+            , Tagged "Half Diminished" halfDiminishedChord
+            , Tagged "Diminished 7th" diminished7thChord
+            , Tagged "Augmented 7th" augmented7thChord
+            ]
 
-generateChord :: Chord -> Note -> List Note
-generateChord (Chord Nil) note = Cons note Nil
-generateChord (Chord (Cons interval rest)) note =
-  Cons note (generateChord (Chord rest) nextNote)
+type ThisChord = { rootNote :: Note, chord :: Array Note }
+
+generateChordHelper :: Chord -> Note -> List Note
+generateChordHelper (Chord Nil) note = Cons note Nil
+generateChordHelper (Chord (Cons interval rest)) note =
+  Cons note (generateChordHelper (Chord rest) nextNote)
   where nextNote = incNoteBy note interval
+
+generateChord :: Chord -> Note -> ThisChord
+generateChord chordIntervals note = { rootNote: note
+                                    , chord: A.fromFoldable (generateChordHelper chordIntervals note) }
