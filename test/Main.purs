@@ -6,10 +6,12 @@ import Effect (Effect)
 import Test.Spec.Reporter.Console (consoleReporter)
 import Test.Spec.Runner (run)
 
-import Test.Chord (chordTests)
-import Test.Note (noteTests)
+import Test.Chord (chordSpec)
+import Test.GuitarString (guitarStringSpec)
+import Test.Note (noteSpec)
 
 main :: Effect Unit
 main = run [consoleReporter] do
-  noteTests
-  chordTests
+  noteSpec
+  chordSpec
+  guitarStringSpec

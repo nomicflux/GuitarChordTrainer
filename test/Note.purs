@@ -2,14 +2,13 @@ module Test.Note where
 
 import Prelude
 import Data.List (fromFoldable)
-import Effect (Effect)
 import Test.Spec (Spec, describe, it)
 import Test.Spec.Assertions (shouldEqual)
 
 import Note as N
 
-noteTests :: Spec Unit
-noteTests =
+noteSpec :: Spec Unit
+noteSpec =
   describe "note distance" do
     it "same note" do
       (N.noteDistance N.A N.A) `shouldEqual` 0

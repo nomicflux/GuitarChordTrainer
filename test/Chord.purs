@@ -2,15 +2,14 @@ module Test.Chord where
 
 import Prelude
 import Data.List (fromFoldable)
-import Effect (Effect)
 import Test.Spec (Spec, describe, it)
 import Test.Spec.Assertions (shouldEqual)
 
 import Chord as C
 import Note as N
 
-chordTests :: Spec Unit
-chordTests =
+chordSpec :: Spec Unit
+chordSpec =
   describe "chords" do
     it "major" do
       (C.generateChord C.majorChord N.C) `shouldEqual` (fromFoldable [N.C, N.E, N.G])
