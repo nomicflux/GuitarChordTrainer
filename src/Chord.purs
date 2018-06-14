@@ -1,9 +1,8 @@
 module Chord where
 
-import Prelude
 import Data.List (List(..), fromFoldable)
 
-import Note (Note(..))
+import Note (Note, incNoteBy)
 import Tagged (Tagged(..))
 
 data Chord = Chord (List Int)

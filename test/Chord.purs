@@ -3,25 +3,14 @@ module Test.Chord where
 import Prelude
 import Data.List (fromFoldable)
 import Effect (Effect)
-import Test.Spec (describe, it)
+import Test.Spec (Spec, describe, it)
 import Test.Spec.Assertions (shouldEqual)
-import Test.Spec.Reporter.Console (consoleReporter)
-import Test.Spec.Runner (run)
 
 import Chord as C
 import Note as N
 
-chordTests :: Effect Unit
-chordTests = run [consoleReporter] do
-  deescribe "note distance" do
-    it "same note" do
-      (N.noteDistance N.A N.A) `shouldEqual` 0
-    it "half step" do
-      (N.noteDistance N.A N.AsBb) `shouldEqual` 1
-    it "fifth" do
-      (N.noteDistance N.A N.E) `shouldEqual` 7
-    it "major seventh" do
-      (N.noteDistance N.C N.B) `shouldEqual` 11
+chordTests :: Spec Unit
+chordTests =
   describe "chords" do
     it "major" do
       (C.generateChord C.majorChord N.C) `shouldEqual` (fromFoldable [N.C, N.E, N.G])
