@@ -2,43 +2,45 @@ module Chord where
 
 import Data.List (List(..), fromFoldable)
 
+import Interval (Interval)
+import Interval as I
 import Note (Note, incNoteBy)
 import Tagged (Tagged(..))
 
-data Chord = Chord (List Int)
+data Chord = Chord (List Interval)
 
 majorChord :: Chord
-majorChord = Chord (fromFoldable [4, 3])
+majorChord = Chord (fromFoldable [I.majorThird, I.minorThird])
 
 minorChord :: Chord
-minorChord = Chord (fromFoldable [3, 4])
+minorChord = Chord (fromFoldable [I.minorThird, I.majorThird])
 
 diminishedChord :: Chord
-diminishedChord = Chord (fromFoldable [3, 3])
+diminishedChord = Chord (fromFoldable [I.minorThird, I.minorThird])
 
 augmentedChord :: Chord
-augmentedChord = Chord (fromFoldable [4, 4])
+augmentedChord = Chord (fromFoldable [I.majorThird, I.majorThird])
 
 dom7thChord :: Chord
-dom7thChord = Chord (fromFoldable [4, 3, 3])
+dom7thChord = Chord (fromFoldable [I.majorThird, I.minorThird, I.minorThird])
 
 major7thChord :: Chord
-major7thChord = Chord (fromFoldable [4, 3, 4])
+major7thChord = Chord (fromFoldable [I.majorThird, I.minorThird, I.majorThird])
 
 minor7thChord :: Chord
-minor7thChord = Chord (fromFoldable [3, 4, 3])
+minor7thChord = Chord (fromFoldable [I.minorThird, I.majorThird, I.minorThird])
 
 majorMinor7thChord :: Chord
-majorMinor7thChord = Chord (fromFoldable [3, 4, 4])
+majorMinor7thChord = Chord (fromFoldable [I.minorThird, I.majorThird, I.majorThird])
 
 halfDiminishedChord :: Chord
-halfDiminishedChord = Chord (fromFoldable [3, 3, 4])
+halfDiminishedChord = Chord (fromFoldable [I.minorThird, I.minorThird, I.majorThird])
 
 diminished7thChord :: Chord
-diminished7thChord = Chord (fromFoldable [3, 3, 3])
+diminished7thChord = Chord (fromFoldable [I.minorThird, I.minorThird, I.minorThird])
 
 augmented7thChord :: Chord
-augmented7thChord = Chord (fromFoldable [4, 4, 2])
+augmented7thChord = Chord (fromFoldable [I.majorThird, I.majorThird, I.majorSecond])
 
 allChords :: List (Tagged Chord)
 allChords = fromFoldable [ Tagged "Major" majorChord

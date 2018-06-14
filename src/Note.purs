@@ -2,6 +2,8 @@ module Note where
 
 import Prelude
 
+import Interval (Interval)
+
 data Note = A | AsBb | B | C | CsDb | D | DsEb | E | F | FsGb | G | GsAb
 
 derive instance eqNote :: Eq Note
@@ -48,15 +50,15 @@ decNote FsGb = F
 decNote G = FsGb
 decNote GsAb = G
 
-incNoteBy :: Note -> Int -> Note
+incNoteBy :: Note -> Interval -> Note
 incNoteBy note 0 = note
 incNoteBy note n = incNoteBy (incNote note) (n - 1)
 
-decNoteBy :: Note -> Int -> Note
+decNoteBy :: Note -> Interval -> Note
 decNoteBy note 0 = note
 decNoteBy note n = decNoteBy (decNote note) (n - 1)
 
-noteDistance :: Note -> Note -> Int
+noteDistance :: Note -> Note -> Interval
 noteDistance from to
   | from == to = 0
   | otherwise = 1 + (noteDistance (incNote from) to)
