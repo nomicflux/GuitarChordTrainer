@@ -1,6 +1,6 @@
 module Note where
 
-import Prelude
+import Prelude ((-), (+), class Show, class Eq, (==), otherwise)
 
 import Interval (Interval)
 

@@ -1,6 +1,7 @@
 module Test.Guitar where
 
 import Prelude
+import Data.Maybe (Maybe(..))
 import Test.Spec (Spec, describe, it)
 import Test.Spec.Assertions (shouldEqual)
 
@@ -20,3 +21,10 @@ guitarSpec =
     it "makes mandolin" do
       let notes = [N.G, N.D, N.A, N.E]
       G.mkGuitar notes `shouldEqual` { strings: mkString <$> notes }
+    it "gets string count" do
+      G.numStrings G.standardGuitar `shouldEqual` 6
+    it "gets correct string" do
+      G.getString G.standardGuitar 1 `shouldEqual` Just (mkString N.E)
+      G.getString G.standardGuitar 2 `shouldEqual` Just (mkString N.B)
+      G.getString G.standardGuitar 5 `shouldEqual` Just (mkString N.A)
+      G.getString G.standardGuitar 6 `shouldEqual` Just (mkString N.E)
