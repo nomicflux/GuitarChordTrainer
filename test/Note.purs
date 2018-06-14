@@ -1,7 +1,6 @@
 module Test.Note where
 
 import Prelude
-import Data.List (fromFoldable)
 import Test.Spec (Spec, describe, it)
 import Test.Spec.Assertions (shouldEqual)
 

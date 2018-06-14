@@ -1,7 +1,8 @@
 module Chord where
 
-import Data.Array as A
 import Data.List (List(..), fromFoldable)
+import Data.Set (Set)
+import Data.Set as S
 
 import Interval (Interval)
 import Interval as I
@@ -57,7 +58,7 @@ allChords = [ Tagged "Major" majorChord
             , Tagged "Augmented 7th" augmented7thChord
             ]
 
-type ThisChord = { rootNote :: Note, chord :: Array Note }
+type ThisChord = { rootNote :: Note, chord :: Set Note }
 
 generateChordHelper :: Chord -> Note -> List Note
 generateChordHelper (Chord Nil) note = Cons note Nil
@@ -67,4 +68,9 @@ generateChordHelper (Chord (Cons interval rest)) note =
 
 generateChord :: Chord -> Note -> ThisChord
 generateChord chordIntervals note = { rootNote: note
-                                    , chord: A.fromFoldable (generateChordHelper chordIntervals note) }
+                                    , chord: S.fromFoldable (generateChordHelper chordIntervals note) }
+
+transposeChord :: ThisChord -> Interval -> ThisChord
+transposeChord chord interval = { rootNote: incNoteBy chord.rootNote interval
+                                , chord: S.map (\n -> incNoteBy n interval) chord.chord
+                                }

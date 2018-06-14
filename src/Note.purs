@@ -1,12 +1,13 @@
 module Note where
 
-import Prelude ((-), (+), class Show, class Eq, (==), otherwise)
+import Prelude ((-), (+), class Show, class Eq, (==), class Ord, otherwise)
 
 import Interval (Interval)
 
 data Note = A | AsBb | B | C | CsDb | D | DsEb | E | F | FsGb | G | GsAb
 
 derive instance eqNote :: Eq Note
+derive instance ordNote :: Ord Note
 
 instance showNote :: Show Note where
   show A = "A"
