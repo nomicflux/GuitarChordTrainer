@@ -4,7 +4,8 @@ import Prelude ((<$>), (-))
 import Data.Array (length, (!!))
 import Data.Maybe (Maybe)
 
-import GuitarString (GuitarString, mkString)
+import GuitarString (GuitarString, mkString, transposeStringUp, transposeStringDown)
+import Interval (Interval)
 import Note (Note)
 import Note as N
 
@@ -30,3 +31,11 @@ standard8String = mkGuitar [N.FsGb, N.B, N.E, N.A, N.D, N.G, N.B, N.E]
 
 mandolin :: Guitar
 mandolin = mkGuitar [N.G, N.D, N.A, N.E]
+
+transposeGuitarUp :: Interval -> Guitar -> Guitar
+transposeGuitarUp interval guitar =
+  guitar { strings = (transposeStringUp interval) <$> guitar.strings }
+
+transposeGuitarDown :: Interval -> Guitar -> Guitar
+transposeGuitarDown interval guitar =
+  guitar { strings = (transposeStringDown interval) <$> guitar.strings }
