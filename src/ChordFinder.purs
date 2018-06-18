@@ -45,3 +45,5 @@ withChord ctx chord = ctx { baseNotes = chord.chord }
 
 withRoot :: ChordContext -> ThisChord -> ChordContext
 withRoot ctx chord = ctx { baseNotes = S.fromFoldable [chord.rootNote] }
+
+getAllChords :: Guitar -> Chord -> Set ThisChord
