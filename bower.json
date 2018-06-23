@@ -14,6 +14,7 @@
   "devDependencies": {
     "purescript-psci-support": "^4.0.0",
     "purescript-spec": "^3.0.0",
-    "purescript-transformers": "^4.1.0"
+    "purescript-transformers": "^4.1.0",
+    "purescript-halogen": "^4.0.0"
   }
 }
