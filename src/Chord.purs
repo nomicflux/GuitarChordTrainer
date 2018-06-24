@@ -2,13 +2,15 @@ module Chord where
 
 import Data.List (List(..), fromFoldable)
 import Data.Maybe (Maybe(..))
-import Data.Ord (class Ord)
+import Data.Profunctor.Strong ((&&&))
 import Data.Set (Set)
 import Data.Set as S
+import Data.Tuple (uncurry)
 import Interval (Interval)
 import Interval as I
 import Note (Note, incNoteBy)
 import Note as N
+import Prelude (class Eq, class Ord, compare, identity, (>>>))
 import Tagged (Tagged(..))
 
 data Chord = Chord (List Interval)
@@ -95,6 +97,24 @@ removeInterval chord interval = chord { chord = S.delete (incNoteBy chord.rootNo
 removeNote :: ThisChord -> Note -> ThisChord
 removeNote chord note = chord { chord = S.delete note chord.chord }
 
-chordToIntervals :: ThisChord -> Set Int
+filterNotes :: ThisChord -> Set Note -> ThisChord
+filterNotes chord notes = chord { chord = S.difference chord.chord notes }
+
+data IntervalledNote = IntervalledNote Interval Note
+
+getInterval :: IntervalledNote -> Interval
+getInterval (IntervalledNote i _) = i
+
+getNote :: IntervalledNote -> Note
+getNote (IntervalledNote _ n) = n
+
+mkIntervalledNote :: Interval -> Note -> IntervalledNote
+mkIntervalledNote interval note = IntervalledNote interval note
+
+derive instance eqIntervalledNote :: Eq IntervalledNote
+instance ordIntervalledNote :: Ord IntervalledNote where
+  compare a b = compare (getInterval a) (getInterval b)
+
+chordToIntervals :: ThisChord -> Set IntervalledNote
 chordToIntervals chord =
-  S.map (N.noteDistance chord.rootNote) chord.chord
+  S.map ((N.noteDistance chord.rootNote &&& identity) >>> uncurry mkIntervalledNote) chord.chord

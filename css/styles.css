@@ -44,6 +44,20 @@
     display: inline-block;
 }
 
-.pure-menu .restricted-height {
-    height: 1em;
+.interval-key.restricted-height {
+    height: 1.3em;
+    padding-left: 5px;
+    padding-top: 10px;
+}
+
+.interval-key:hover {
+    cursor: pointer;
+}
+
+.interval-key.filtered {
+    background: #DDD;
+    color: #888;
+}
+
+.interval-key.unfiltered {
 }
