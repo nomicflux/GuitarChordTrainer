@@ -1,5 +1,7 @@
 ## Guitar Chord Trainer
 
+Link here: [https://nomicflux.github.io/GuitarChordTrainer]
+
 Lets the user find chords over the fretboard of guitars or other fretted instruments in any tuning, and colors the notes
 by interval.
 
