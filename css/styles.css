@@ -77,14 +77,14 @@ body {
 
 @media only screen and (max-device-width: 812px) {
     .gct-select-div {
-        font-size: 16px;
+        font-size: 2em;
     }
 
     .interval-key {
-        font-size: 20px;
+        font-size: 3em;
     }
 
     .color-button {
-        font-size: 14px;
+        font-size: 1.5em;
     }
 }
