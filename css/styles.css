@@ -39,3 +39,11 @@
 .button-secondary {
     background: rgb(66, 184, 221); /* this is a light blue */
 }
+
+.restricted-width {
+    display: inline-block;
+}
+
+.pure-menu .restricted-height {
+    height: 1em;
+}

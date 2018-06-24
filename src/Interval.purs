@@ -1,6 +1,6 @@
 module Interval where
 
-import Prelude (identity)
+import Prelude (identity, otherwise, (==))
 
 type Interval = Int
 
@@ -64,3 +64,19 @@ minorThirteenth = minorSixth
 
 majorThirteenth :: Interval
 majorThirteenth = majorSixth
+
+intervalToName :: Interval -> String
+intervalToName interval
+  | interval == sameNote = "Root"
+  | interval == minorThird = "Minor Third"
+  | interval == majorThird = "Major Third"
+  | interval == diminishedFifth = "Tritone"
+  | interval == fifth = "Fifth"
+  | interval == minorSeventh = "Minor Seventh"
+  | interval == majorSeventh = "Major Seventh"
+  | interval == minorNinth = "Minor Second / Ninth"
+  | interval == majorNinth = "Major Second / Ninth"
+  | interval == eleventh = "Fourth / Eleventh"
+  | interval == minorThirteenth = "Minor Sixth / Thirteenth"
+  | interval == majorThirteenth = "Major Sixth / Thirteenth"
+  | otherwise = "_"

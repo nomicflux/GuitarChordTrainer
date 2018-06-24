@@ -5,6 +5,7 @@ import Prelude
 import Chord (ThisChord)
 import Color as Color
 import Component.Constants (fretHeight, fretWidth, halfFretWidth, halfStringWidth, pushedFretRadius, stringLength)
+import Component.FretColor (fretColor)
 import Component.SVG as SVG
 import Data.Array ((:))
 import Data.Array as A
@@ -69,16 +70,6 @@ component =
   , receiver: const Nothing
   }
 
-fretColor :: Int -> String
-fretColor interval =
-  let hue = (toNumber interval) / 12.0 * 360.0
-      saturation = if interval `mod` 2 == 0 then 1.0 else 0.6
-      lightness = if interval `mod` 2 == 0 then 0.5 else 0.7
-      alpha = 1.0
-      color = Color.hsla hue saturation lightness alpha
-  in
-   Color.toHexString color
-
 fretColorLess :: Int -> String
 fretColorLess interval =
   if interval == 0 then "red" else "black"
@@ -139,7 +130,7 @@ getNotePositions string root note =
       fromRoot = N.noteDistance root note
   in L.fromFoldable [ FrettedNote { fret: fret, fromRoot: Just fromRoot}
                     , FrettedNote { fret: fret + 12, fromRoot: Just fromRoot }
-
+                    , FrettedNote { fret: fret + 24, fromRoot: Just fromRoot }
                     ]
 
 eval :: forall m. Query ~> H.ComponentDSL State Query Void m

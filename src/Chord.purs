@@ -5,10 +5,10 @@ import Data.Maybe (Maybe(..))
 import Data.Ord (class Ord)
 import Data.Set (Set)
 import Data.Set as S
-
 import Interval (Interval)
 import Interval as I
 import Note (Note, incNoteBy)
+import Note as N
 import Tagged (Tagged(..))
 
 data Chord = Chord (List Interval)
@@ -94,3 +94,7 @@ removeInterval chord interval = chord { chord = S.delete (incNoteBy chord.rootNo
 
 removeNote :: ThisChord -> Note -> ThisChord
 removeNote chord note = chord { chord = S.delete note chord.chord }
+
+chordToIntervals :: ThisChord -> Set Int
+chordToIntervals chord =
+  S.map (N.noteDistance chord.rootNote) chord.chord
