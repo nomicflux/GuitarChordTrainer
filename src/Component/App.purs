@@ -26,6 +26,7 @@ type State = { currentGuitar :: Guitar
              , currentChord :: Chord
              , currentNote :: Note
              , slot :: String
+             , showColor :: Boolean
              }
 
 initialState :: State
@@ -36,11 +37,13 @@ initialState =
    , currentChord: maybe C.majorChord T.getValue (C.allChords !! 0)
    , currentNote: maybe N.A T.getValue (N.allNotes !! 0)
    , slot: maybe "" T.getName mguitar
+   , showColor: true
    }
 
 data Query a = ChangeGuitar String a
              | ChangeChord String a
              | ChangeNote String a
+             | ToggleShowColor a
              | HandleGuitar a
 
 data Slot = Slot String
@@ -71,7 +74,18 @@ render state =
         [ mkSelect "Guitar" guitarMap (Just state.slot) ChangeGuitar
         , mkSelect "Chord" chordMap Nothing ChangeChord
         , mkSelect "Note" noteMap Nothing ChangeNote
+        , mkButton ((if state.showColor then "Hide" else "Show") <> " Intervals") "plain" ToggleShowColor
         ]
+      ]
+
+    mkButton :: String -> String -> (Unit -> Query Unit) -> H.ParentHTML Query CG.Query Slot m
+    mkButton text class_ query =
+      HH.div_
+      [ HH.button [ HP.class_ $ HH.ClassName ("pure-button button-" <> class_)
+                  , HE.onClick $ HE.input_ query
+                  , HP.type_ $ HP.ButtonButton
+                  ]
+        [ HH.text text ]
       ]
 
     mkOption :: forall p i. String -> HH.HTML p i
@@ -132,5 +146,12 @@ eval = case _ of
                           let thisChord = C.generateChord chord note
                           _ <- H.query (Slot slot) $ H.request (CG.ShowChord thisChord)
                           pure next) mnote
+  ToggleShowColor next -> do
+    slot <- H.gets (_.slot)
+    showColor <- H.gets (_.showColor)
+    let nowShow = not showColor
+    H.modify_ (_ { showColor = nowShow })
+    _ <- H.query (Slot slot) $ H.request (CG.ShowColor nowShow)
+    pure next
   HandleGuitar next ->
     pure next

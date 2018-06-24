@@ -4,7 +4,7 @@ import Prelude
 
 import Chord (ThisChord)
 import Chord as C
-import Component.Constants (fretHeight, fretWidth, halfFretWidth, stringLength)
+import Component.Constants (fretHeight, fretMarkerRadius, fretWidth, halfFretWidth, stringLength)
 import Component.GuitarString as GS
 import Component.SVG as SVG
 import Data.Array as A
@@ -17,6 +17,7 @@ import Halogen.HTML.Events as HE
 import Note as N
 
 data Query a = ShowChord ThisChord (Unit -> a)
+             | ShowColor Boolean (Unit -> a)
              | HandleString Int GuitarString a
 
 data Slot = Slot Int
@@ -69,15 +70,17 @@ octaveFrets = [12, 24]
 
 renderOctaveFret :: forall p i. Int -> Int -> Array (HH.HTML p i)
 renderOctaveFret numStrings fret =
-   [ renderFretCircle numStrings fret 4 (-6)
-   , renderFretCircle numStrings fret 4 6
+  let spacing = fretMarkerRadius * 3 / 2
+  in
+   [ renderFretCircle numStrings fret fretMarkerRadius (-spacing)
+   , renderFretCircle numStrings fret fretMarkerRadius spacing
    ]
 
 keyFrets :: Array Int
 keyFrets = [3, 5, 7, 9, 15, 17, 19, 21]
 
 renderKeyFret :: forall p i. Int -> Int -> HH.HTML p i
-renderKeyFret numStrings fret = renderFretCircle numStrings fret 4 0
+renderKeyFret numStrings fret = renderFretCircle numStrings fret fretMarkerRadius 0
 
 render :: forall m. State -> H.ParentHTML Query GS.Query Slot m
 render state =
@@ -99,16 +102,24 @@ render state =
              ] $ renderedKeyFrets <> renderedOctaveFrets <> renderedStrings
    ]
 
+getSlotIds :: State -> Array Int
+getSlotIds state =
+  let numStrings = A.length state.guitar.strings
+  in A.range 0 $ numStrings - 1
+
 eval :: forall m. Query ~> H.ParentDSL State Query GS.Query Slot Message m
 eval = case _ of
   ShowChord chord next -> do
-    strings <- H.gets (_.guitar.strings)
-    let numStrings = A.length strings
-        reset _ id = H.query (Slot id) $ H.request GS.Reset
+    ids <- H.gets getSlotIds
+    let reset _ id = H.query (Slot id) $ H.request GS.Reset
         pushNotes _ id = H.query (Slot id) $ H.request (GS.PushChord chord)
-        ids = (A.range 0 $ numStrings - 1)
     _ <- A.foldM reset Nothing ids
     _ <- A.foldM pushNotes Nothing ids
     pure $ next unit
+  ShowColor showColor reply -> do
+    ids <- H.gets getSlotIds
+    let toggleColor _ id = H.query (Slot id) $ H.request (GS.ShowColor showColor)
+    _ <- A.foldM toggleColor Nothing ids
+    pure $ reply unit
   HandleString id string next -> do
     pure next
