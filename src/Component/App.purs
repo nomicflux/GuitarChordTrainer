@@ -98,7 +98,7 @@ render state =
         [ mkSelect "Tuning" guitarMap (Just state.slot) ChangeGuitar
         , mkSelect "Chord" chordMap Nothing ChangeChord
         , mkSelect "Note" noteMap Nothing ChangeNote
-        , mkButton ((if state.showColor then "Hide" else "Show") <> " Intervals") "plain" ToggleShowColor
+        , mkButton ((if state.showColor then "Hide" else "Show") <> " Interval Color") "plain" ToggleShowColor
         ] <> maybe [] (A.singleton <<< renderIntervalChart <<< C.chordToIntervals) (getChord state)
       ]
 
