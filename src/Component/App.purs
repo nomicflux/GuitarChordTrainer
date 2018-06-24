@@ -198,31 +198,38 @@ eval = case _ of
                             Nothing -> pure next
                       ) mguitar
   ChangeChord name next -> do
-    let mchord = M.lookup name chordMap
-    maybe (pure next) (\newChord -> do
-                          H.modify_ (_ { currentChord = Just newChord
-                                       , filteredNotes = emptyFilter
-                                       })
-                          thisChord <- H.gets getChord
-                          case thisChord of
-                            Just chord -> do
-                              slot <- H.gets (_.slot)
-                              _ <- H.query (Slot slot) $ H.request (CG.ShowChord chord)
-                              pure next
-                            Nothing -> pure next) mchord
+    case M.lookup name chordMap of
+      Nothing -> pure next
+      Just newChord -> do
+        H.modify_ (_ { currentChord = Just newChord
+                     , filteredNotes = emptyFilter
+                     })
+        thisChord <- H.gets getChord
+        case thisChord of
+          Nothing -> pure next
+          Just chord -> do
+            slot <- H.gets (_.slot)
+            _ <- H.query (Slot slot) $ H.request (CG.ShowChord chord)
+            pure next
   ChangeNote name next -> do
-    let mnote = M.lookup name noteMap
-    maybe (pure next) (\newNote -> do
-                          H.modify_ (_ { currentNote = Just newNote
-                                       , filteredNotes = emptyFilter
-                                       })
-                          thisChord <- H.gets getChord
-                          case thisChord of
-                            Just chord -> do
-                              slot <- H.gets (_.slot)
-                              _ <- H.query (Slot slot) $ H.request (CG.ShowChord chord)
-                              pure next
-                            Nothing -> pure next) mnote
+    case M.lookup name noteMap of
+      Nothing -> pure next
+      Just newNote -> do
+        oldNote <- H.gets (_.currentNote)
+        filteredNotes <- H.gets (_.filteredNotes)
+        let change = (flip N.noteDistance) newNote <$> oldNote
+            newFilter =
+              maybe emptyFilter (\d -> S.map ((flip N.incNoteBy) d) filteredNotes) change
+        H.modify_ (_ { currentNote = Just newNote
+                     , filteredNotes = newFilter
+                     })
+        thisChord <- H.gets getFilteredChord
+        case thisChord of
+          Nothing -> pure next
+          Just chord -> do
+            slot <- H.gets (_.slot)
+            _ <- H.query (Slot slot) $ H.request (CG.ShowChord chord)
+            pure next
   ToggleShowColor next -> do
     slot <- H.gets (_.slot)
     showColor <- H.gets (_.showColor)
