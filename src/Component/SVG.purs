@@ -23,6 +23,9 @@ text = svgElement (ElemName "text")
 circle :: forall r p i. Array (IProp r i) -> HTML p i
 circle props = svgElement (ElemName "circle") props []
 
+rect :: forall r p i. Array (IProp r i) -> HTML p i
+rect props = svgElement (ElemName "rect") props []
+
 line :: forall r p i. Array (IProp r i) -> HTML p i
 line props = svgElement (ElemName "line") props []
 

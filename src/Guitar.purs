@@ -1,13 +1,12 @@
 module Guitar where
 
-import Prelude ((<$>), (-))
 import Data.Array (length, (!!))
 import Data.Maybe (Maybe)
-
-import GuitarString (GuitarString, mkString, transposeStringUp, transposeStringDown)
+import GuitarString (GuitarString, mkString, transposeStringDown, transposeStringUp)
 import Interval (Interval)
 import Note (Note)
 import Note as N
+import Prelude ((<$>), (-))
 
 type Guitar = { strings :: Array GuitarString }
 
@@ -26,11 +25,23 @@ standardGuitar = mkGuitar [N.E, N.A, N.D, N.G, N.B, N.E]
 dropD :: Guitar
 dropD = mkGuitar [N.D, N.A, N.D, N.G, N.B, N.D]
 
+openG :: Guitar
+openG = mkGuitar [N.D, N.G, N.D, N.G, N.B, N.D]
+
+standard7String :: Guitar
+standard7String = mkGuitar [N.B, N.E, N.A, N.D, N.G, N.B, N.E]
+
 standard8String :: Guitar
 standard8String = mkGuitar [N.FsGb, N.B, N.E, N.A, N.D, N.G, N.B, N.E]
 
+ukulele :: Guitar
+ukulele = mkGuitar [N.G, N.C, N.E, N.A]
+
 mandolin :: Guitar
 mandolin = mkGuitar [N.G, N.D, N.A, N.E]
+
+standard5StringBanjo :: Guitar
+standard5StringBanjo = mkGuitar [N.G, N.D, N.G, N.B, N.D]
 
 transposeGuitarUp :: Interval -> Guitar -> Guitar
 transposeGuitarUp interval guitar =

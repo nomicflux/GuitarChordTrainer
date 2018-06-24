@@ -1,0 +1,15 @@
+.fret {
+    z-index: 0;
+}
+
+.pushed-fret {
+    z-index: 3;
+}
+
+.string {
+    z-index: 2;
+}
+
+.clearing-box {
+    z-index: 1;
+}
