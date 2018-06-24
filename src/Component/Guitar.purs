@@ -3,7 +3,6 @@ module Component.Guitar where
 import Prelude
 
 import Chord (ThisChord)
-import Chord as C
 import Component.Constants (fretHeight, fretMarkerRadius, fretWidth, halfFretWidth, stringLength)
 import Component.GuitarString as GS
 import Component.SVG as SVG
@@ -14,7 +13,6 @@ import GuitarString (GuitarString)
 import Halogen as H
 import Halogen.HTML as HH
 import Halogen.HTML.Events as HE
-import Note as N
 
 data Query a = ShowChord ThisChord (Unit -> a)
              | ShowColor Boolean (Unit -> a)

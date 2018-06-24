@@ -3,13 +3,11 @@ module Component.GuitarString where
 import Prelude
 
 import Chord (ThisChord)
-import Color as Color
-import Component.Constants (fretHeight, fretWidth, halfFretWidth, halfStringWidth, pushedFretRadius, stringLength)
+import Component.Constants (fretHeight, halfFretWidth, halfStringWidth, pushedFretRadius)
 import Component.FretColor (fretColor)
 import Component.SVG as SVG
 import Data.Array ((:))
 import Data.Array as A
-import Data.Int (toNumber)
 import Data.List (List)
 import Data.List as L
 import Data.Maybe (Maybe(..), maybe)

@@ -48,18 +48,34 @@ diminished7thChord = Chord (fromFoldable [I.minorThird, I.minorThird, I.minorThi
 augmented7thChord :: Chord
 augmented7thChord = Chord (fromFoldable [I.majorThird, I.majorThird, I.majorSecond])
 
+dom7thFlat9th :: Chord
+dom7thFlat9th = Chord (fromFoldable [I.majorThird, I.minorThird, I.minorThird, I.minorThird])
+
+dom7thSharp9th :: Chord
+dom7thSharp9th = Chord (fromFoldable [I.majorThird, I.minorThird, I.minorThird, I.fourth])
+
+dom7thFlat13th :: Chord
+dom7thFlat13th = Chord (fromFoldable [I.majorThird, I.minorThird, I.minorThird, I.minorSeventh])
+
+dom7th13th :: Chord
+dom7th13th = Chord (fromFoldable [I.majorThird, I.minorThird, I.minorThird, I.majorSeventh])
+
 allChords :: Array (Tagged Chord)
 allChords = [ Tagged "Major" majorChord
             , Tagged "Minor" minorChord
             , Tagged "Diminished" diminishedChord
             , Tagged "Augmented" augmentedChord
-            , Tagged "Dom 7th" dom7thChord
-            , Tagged "Maj 7th" major7thChord
-            , Tagged "Min 7th" minor7thChord
-            , Tagged "Maj Min 7th" majorMinor7thChord
+            , Tagged "Dominant 7th" dom7thChord
+            , Tagged "Major 7th" major7thChord
+            , Tagged "Minor 7th" minor7thChord
+            , Tagged "Major Minor 7th" majorMinor7thChord
             , Tagged "Half Diminished" halfDiminishedChord
             , Tagged "Diminished 7th" diminished7thChord
             , Tagged "Augmented 7th" augmented7thChord
+            , Tagged "Dominant b9" dom7thFlat9th
+            , Tagged "Dominant #9" dom7thSharp9th
+            , Tagged "Dominant b13" dom7thFlat13th
+            , Tagged "Dominant 13th" dom7th13th
             ]
 
 type ThisChord = { rootNote :: Note, chord :: Set Note }
