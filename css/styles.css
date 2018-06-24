@@ -1,3 +1,7 @@
+body {
+    padding: 10px;
+}
+
 .fret {
     z-index: 0;
 }
