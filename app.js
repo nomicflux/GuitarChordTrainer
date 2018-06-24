@@ -1336,7 +1336,7 @@ var render = function (state) {
             };
         };
     };
-    var renderSidebar = Halogen_HTML_Elements.div([ Halogen_HTML_Properties.class_("pure-u pure-u-sm-1 pure-u-md-1-2 pure-u-lg-1-3") ])([ Halogen_HTML_Elements.form([ Halogen_HTML_Properties.class_("pure-form") ])(Data_Semigroup.append(Data_Semigroup.semigroupArray)([ mkSelect("Tuning")(guitarMap)(new Data_Maybe.Just(state.slot))(ChangeGuitar.create), mkSelect("Chord")(chordMap)(Data_Maybe.Nothing.value)(ChangeChord.create), mkSelect("Note")(noteMap)(Data_Maybe.Nothing.value)(ChangeNote.create), mkButton((function () {
+    var renderSidebar = Halogen_HTML_Elements.div([ Halogen_HTML_Properties.class_("pure-u-1 pure-u-sm-1 pure-u-md-1-2 pure-u-lg-1-3") ])([ Halogen_HTML_Elements.form([ Halogen_HTML_Properties.class_("pure-form") ])(Data_Semigroup.append(Data_Semigroup.semigroupArray)([ mkSelect("Tuning")(guitarMap)(new Data_Maybe.Just(state.slot))(ChangeGuitar.create), mkSelect("Chord")(chordMap)(Data_Maybe.Nothing.value)(ChangeChord.create), mkSelect("Note")(noteMap)(Data_Maybe.Nothing.value)(ChangeNote.create), mkButton((function () {
         if (state.showColor) {
             return "Hide";
         };
@@ -1344,7 +1344,7 @@ var render = function (state) {
     })() + " Interval Colors")("plain")(ToggleShowColor.create) ])(Data_Maybe.maybe([  ])(function ($107) {
         return Data_Array.singleton(renderIntervalChart(Chord.chordToIntervals($107)));
     })(getChord(state)))) ]);
-    return Halogen_HTML_Elements.div([ Halogen_HTML_Properties.class_("pure-g") ])([ renderSidebar, Halogen_HTML_Elements.div([ Halogen_HTML_Properties.class_("pure-u pure-u-sm-1 pure-u-md-1-2 pure-u-lg-2-3") ])([ Halogen_HTML.slot(new Slot(state.slot))(Component_Guitar.component)(state.currentGuitar)(Halogen_HTML_Events.input_(HandleGuitar.create)) ]) ]);
+    return Halogen_HTML_Elements.div([ Halogen_HTML_Properties.class_("pure-g") ])([ renderSidebar, Halogen_HTML_Elements.div([ Halogen_HTML_Properties.class_("pure-u-1 pure-u-md-1-2 pure-u-lg-2-3") ])([ Halogen_HTML.slot(new Slot(state.slot))(Component_Guitar.component)(state.currentGuitar)(Halogen_HTML_Events.input_(HandleGuitar.create)) ]) ]);
 };
 var component = Halogen_Component.parentComponent(ordSlot)({
     initialState: Data_Function["const"](initialState),
