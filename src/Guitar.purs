@@ -44,6 +44,12 @@ mandolin = mkGuitar [N.G, N.D, N.A, N.E]
 standard5StringBanjo :: Guitar
 standard5StringBanjo = mkGuitar [N.G, N.D, N.G, N.B, N.D]
 
+bass :: Guitar
+bass = mkGuitar [N.E, N.A, N.D, N.G]
+
+fiveStringBass :: Guitar
+fiveStringBass = mkGuitar [N.B, N.E, N.A, N.D, N.G]
+
 allGuitars :: Array (Tagged Guitar)
 allGuitars = [ Tagged "Standard Tuning" standardGuitar
              , Tagged "Drop D Tuning" dropD
@@ -53,6 +59,8 @@ allGuitars = [ Tagged "Standard Tuning" standardGuitar
              , Tagged "Mandolin" mandolin
              , Tagged "Ukulele" ukulele
              , Tagged "Standard 5 String Banjo" standard5StringBanjo
+             , Tagged "Standerd 4 String Bass" bass
+             , Tagged "Standerd 5 String Bass" bass
              ]
 
 transposeGuitarUp :: Interval -> Guitar -> Guitar
