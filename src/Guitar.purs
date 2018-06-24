@@ -59,7 +59,7 @@ allGuitars = [ Tagged "Standard Tuning" standardGuitar
              , Tagged "Mandolin" mandolin
              , Tagged "Ukulele" ukulele
              , Tagged "Standard 5 String Banjo" standard5StringBanjo
-             , Tagged "Standerd 4 String Bass" bass
+             , Tagged "Standard 4 String Bass" bass
              , Tagged "Standerd 5 String Bass" bass
              ]
 
