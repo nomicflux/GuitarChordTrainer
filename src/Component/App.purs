@@ -98,7 +98,7 @@ render state =
         [ mkSelect "Tuning" guitarMap (Just state.slot) ChangeGuitar
         , mkSelect "Chord" chordMap Nothing ChangeChord
         , mkSelect "Note" noteMap Nothing ChangeNote
-        , mkButton ((if state.showColor then "Hide" else "Show") <> " Interval Color") "plain" ToggleShowColor
+        , mkButton ((if state.showColor then "Hide" else "Show") <> " Interval Colors") "plain" ToggleShowColor
         ] <> maybe [] (A.singleton <<< renderIntervalChart <<< C.chordToIntervals) (getChord state)
       ]
 
@@ -189,9 +189,8 @@ eval = case _ of
     maybe (pure next) (\guitar -> do
                           H.modify_ (_ { currentGuitar = guitar
                                        , slot = name
-                                       , filteredNotes = emptyFilter
                                        })
-                          thisChord <- H.gets getChord
+                          thisChord <- H.gets getFilteredChord
                           case thisChord of
                             Just chord ->  do
                               _ <- H.query (Slot name) $ H.request (CG.ShowChord chord)
