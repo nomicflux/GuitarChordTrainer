@@ -1312,7 +1312,7 @@ var render = function (state) {
     };
     var renderIntervalChart = function (intervals) {
         var aIntervals = Data_Array.fromFoldable(Data_Set.foldableSet)(intervals);
-        return Halogen_HTML_Elements.div([ Halogen_HTML_Properties.class_("pure-menu restricted-width") ])([ Halogen_HTML_Elements.ul([ Halogen_HTML_Properties.class_("pure-menu-list") ])(Data_Functor.map(Data_Functor.functorArray)(renderInterval)(aIntervals)) ]);
+        return Halogen_HTML_Elements.div([ Halogen_HTML_Properties.class_("pure-menu restricted-width") ])([ Halogen_HTML_Elements.ul([ Halogen_HTML_Properties.class_("pure-menu-list intervals-chart") ])(Data_Functor.map(Data_Functor.functorArray)(renderInterval)(aIntervals)) ]);
     };
     var mkOption = function (k) {
         return Halogen_HTML_Elements.option([ Halogen_HTML_Properties.value(k) ])([ Halogen_HTML_Core.text(k) ]);
@@ -1332,7 +1332,7 @@ var render = function (state) {
     var mkButton = function (text) {
         return function (class_) {
             return function (query) {
-                return Halogen_HTML_Elements.div_([ Halogen_HTML_Elements.button([ Halogen_HTML_Properties.class_("pure-button button-" + class_), Halogen_HTML_Events.onClick(Halogen_HTML_Events.input_(query)), Halogen_HTML_Properties.type_(Halogen_HTML_Core.buttonTypeIsProp)(DOM_HTML_Indexed_ButtonType.ButtonButton.value) ])([ Halogen_HTML_Core.text(text) ]) ]);
+                return Halogen_HTML_Elements.div_([ Halogen_HTML_Elements.button([ Halogen_HTML_Properties.class_("pure-button color-button button-" + class_), Halogen_HTML_Events.onClick(Halogen_HTML_Events.input_(query)), Halogen_HTML_Properties.type_(Halogen_HTML_Core.buttonTypeIsProp)(DOM_HTML_Indexed_ButtonType.ButtonButton.value) ])([ Halogen_HTML_Core.text(text) ]) ]);
             };
         };
     };

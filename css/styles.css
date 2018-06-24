@@ -48,6 +48,10 @@ body {
     display: inline-block;
 }
 
+.intervals-chart {
+    margin-top: 10px;
+}
+
 .interval-key.restricted-height {
     height: 1.3em;
     padding-left: 5px;
@@ -69,4 +73,18 @@ body {
 .gct-select-div {
     margin: 10px;
     padding: 10px;
+}
+
+@media only screen and (max-width: 768px) {
+    .gct-select-div {
+        font-size: 1.3em;
+    }
+
+    .interval-key {
+        font-size: 1.3em;
+    }
+
+    .color-button {
+        font-size: 1.2em;
+    }
 }

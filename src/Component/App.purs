@@ -139,14 +139,14 @@ render state =
       let aIntervals = A.fromFoldable intervals
       in
        HH.div [ HP.class_ $ HH.ClassName "pure-menu restricted-width"]
-       [ HH.ul [ HP.class_ $ HH.ClassName "pure-menu-list"]
+       [ HH.ul [ HP.class_ $ HH.ClassName "pure-menu-list intervals-chart"]
          (renderInterval <$> aIntervals)
        ]
 
     mkButton :: String -> String -> (Unit -> Query Unit) -> H.ParentHTML Query CG.Query Slot m
     mkButton text class_ query =
       HH.div_
-      [ HH.button [ HP.class_ $ HH.ClassName ("pure-button button-" <> class_)
+      [ HH.button [ HP.class_ $ HH.ClassName ("pure-button color-button button-" <> class_)
                   , HE.onClick $ HE.input_ query
                   , HP.type_ $ HP.ButtonButton
                   ]
