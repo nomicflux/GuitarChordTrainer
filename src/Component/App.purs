@@ -87,13 +87,13 @@ render :: forall m. State -> H.ParentHTML Query CG.Query Slot m
 render state =
   HH.div [ HP.class_ $ HH.ClassName "pure-g" ]
   [ renderSidebar
-  ,  HH.div [ HP.class_ $ HH.ClassName "pure-u pure-u-sm-1 pure-u-md-2-3" ]
+  ,  HH.div [ HP.class_ $ HH.ClassName "pure-u pure-u-sm-1 pure-u-md-1-2 pure-u-lg-2-3" ]
      [ HH.slot (Slot state.slot) CG.component state.currentGuitar $ HE.input_ HandleGuitar ]
   ]
   where
     renderSidebar :: H.ParentHTML Query CG.Query Slot m
     renderSidebar =
-      HH.div [ HP.class_ $ HH.ClassName "pure-u pure-u-sm-1 pure-u-md-1-3" ]
+      HH.div [ HP.class_ $ HH.ClassName "pure-u pure-u-sm-1 pure-u-md-1-2 pure-u-lg-1-3" ]
       [ HH.form [ HP.class_ $ HH.ClassName "pure-form" ] $
         [ mkSelect "Tuning" guitarMap (Just state.slot) ChangeGuitar
         , mkSelect "Chord" chordMap Nothing ChangeChord
@@ -165,7 +165,7 @@ render state =
       let
         keys = A.fromFoldable $ M.keys items
       in
-       HH.div_
+       HH.div [ HP.class_ $ HH.ClassName "gct-select-div" ]
        [ HH.label [HP.for label] [ HH.text $ label <> ": " ]
        , HH.select ([ HP.name label
                     , HE.onValueChange (HE.input query)
