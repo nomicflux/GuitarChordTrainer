@@ -1108,31 +1108,42 @@ var chordMap = Tagged.taggedToMap(Chord.allChords);
 var $$eval = function (v) {
     if (v instanceof ChangeGuitar) {
         var mguitar = Data_Map_Internal.lookup(Data_Ord.ordString)(v.value0)(guitarMap);
-        return Data_Maybe.maybe(Control_Applicative.pure(Halogen_Query_HalogenM.applicativeHalogenM)(v.value1))(function (guitar) {
-            return Control_Bind.discard(Control_Bind.discardUnit)(Halogen_Query_HalogenM.bindHalogenM)(Control_Monad_State_Class.modify_(Halogen_Query_HalogenM.monadStateHalogenM)(function (v1) {
-                var $54 = {};
-                for (var $55 in v1) {
-                    if ({}.hasOwnProperty.call(v1, $55)) {
-                        $54[$55] = v1[$55];
+        var v1 = Data_Map_Internal.lookup(Data_Ord.ordString)(v.value0)(guitarMap);
+        if (v1 instanceof Data_Maybe.Nothing) {
+            return Control_Applicative.pure(Halogen_Query_HalogenM.applicativeHalogenM)(v.value1);
+        };
+        if (v1 instanceof Data_Maybe.Just) {
+            return Control_Bind.discard(Control_Bind.discardUnit)(Halogen_Query_HalogenM.bindHalogenM)(Control_Monad_State_Class.modify_(Halogen_Query_HalogenM.monadStateHalogenM)(function (v2) {
+                var $59 = {};
+                for (var $60 in v2) {
+                    if ({}.hasOwnProperty.call(v2, $60)) {
+                        $59[$60] = v2[$60];
                     };
                 };
-                $54.currentGuitar = guitar;
-                $54.slot = v.value0;
-                return $54;
+                $59.currentGuitar = v1.value0;
+                $59.slot = v.value0;
+                return $59;
             }))(function () {
-                return Control_Bind.bind(Halogen_Query_HalogenM.bindHalogenM)(Control_Monad_State_Class.gets(Halogen_Query_HalogenM.monadStateHalogenM)(getFilteredChord))(function (v1) {
-                    if (v1 instanceof Data_Maybe.Just) {
-                        return Control_Bind.bind(Halogen_Query_HalogenM.bindHalogenM)(Halogen_Query.query(eqSlot)(new Slot(v.value0))(Halogen_Query.request(Component_Guitar.ShowChord.create(v1.value0))))(function (v2) {
-                            return Control_Applicative.pure(Halogen_Query_HalogenM.applicativeHalogenM)(v.value1);
-                        });
-                    };
-                    if (v1 instanceof Data_Maybe.Nothing) {
+                return Control_Bind.bind(Halogen_Query_HalogenM.bindHalogenM)(Control_Monad_State_Class.gets(Halogen_Query_HalogenM.monadStateHalogenM)(getFilteredChord))(function (v2) {
+                    if (v2 instanceof Data_Maybe.Nothing) {
                         return Control_Applicative.pure(Halogen_Query_HalogenM.applicativeHalogenM)(v.value1);
                     };
-                    throw new Error("Failed pattern match at Component.App line 194, column 27 - line 198, column 49: " + [ v1.constructor.name ]);
+                    if (v2 instanceof Data_Maybe.Just) {
+                        return Control_Bind.bind(Halogen_Query_HalogenM.bindHalogenM)(Halogen_Query.query(eqSlot)(new Slot(v.value0))(Halogen_Query.request(Component_Guitar.ShowChord.create(v2.value0))))(function (v3) {
+                            return Control_Bind.bind(Halogen_Query_HalogenM.bindHalogenM)(Control_Monad_State_Class.gets(Halogen_Query_HalogenM.monadStateHalogenM)(function (v4) {
+                                return v4.showColor;
+                            }))(function (v4) {
+                                return Control_Bind.bind(Halogen_Query_HalogenM.bindHalogenM)(Halogen_Query.query(eqSlot)(new Slot(v.value0))(Halogen_Query.request(Component_Guitar.ShowColor.create(v4))))(function (v5) {
+                                    return Control_Applicative.pure(Halogen_Query_HalogenM.applicativeHalogenM)(v.value1);
+                                });
+                            });
+                        });
+                    };
+                    throw new Error("Failed pattern match at Component.App line 196, column 9 - line 202, column 22: " + [ v2.constructor.name ]);
                 });
             });
-        })(mguitar);
+        };
+        throw new Error("Failed pattern match at Component.App line 189, column 5 - line 202, column 22: " + [ v1.constructor.name ]);
     };
     if (v instanceof ChangeChord) {
         var v1 = Data_Map_Internal.lookup(Data_Ord.ordString)(v.value0)(chordMap);
@@ -1141,15 +1152,15 @@ var $$eval = function (v) {
         };
         if (v1 instanceof Data_Maybe.Just) {
             return Control_Bind.discard(Control_Bind.discardUnit)(Halogen_Query_HalogenM.bindHalogenM)(Control_Monad_State_Class.modify_(Halogen_Query_HalogenM.monadStateHalogenM)(function (v2) {
-                var $63 = {};
-                for (var $64 in v2) {
-                    if ({}.hasOwnProperty.call(v2, $64)) {
-                        $63[$64] = v2[$64];
+                var $70 = {};
+                for (var $71 in v2) {
+                    if ({}.hasOwnProperty.call(v2, $71)) {
+                        $70[$71] = v2[$71];
                     };
                 };
-                $63.currentChord = new Data_Maybe.Just(v1.value0);
-                $63.filteredNotes = emptyFilter;
-                return $63;
+                $70.currentChord = new Data_Maybe.Just(v1.value0);
+                $70.filteredNotes = emptyFilter;
+                return $70;
             }))(function () {
                 return Control_Bind.bind(Halogen_Query_HalogenM.bindHalogenM)(Control_Monad_State_Class.gets(Halogen_Query_HalogenM.monadStateHalogenM)(getChord))(function (v2) {
                     if (v2 instanceof Data_Maybe.Nothing) {
@@ -1164,11 +1175,11 @@ var $$eval = function (v) {
                             });
                         });
                     };
-                    throw new Error("Failed pattern match at Component.App line 208, column 9 - line 213, column 22: " + [ v2.constructor.name ]);
+                    throw new Error("Failed pattern match at Component.App line 211, column 9 - line 216, column 22: " + [ v2.constructor.name ]);
                 });
             });
         };
-        throw new Error("Failed pattern match at Component.App line 201, column 5 - line 213, column 22: " + [ v1.constructor.name ]);
+        throw new Error("Failed pattern match at Component.App line 204, column 5 - line 216, column 22: " + [ v1.constructor.name ]);
     };
     if (v instanceof ChangeNote) {
         var v1 = Data_Map_Internal.lookup(Data_Ord.ordString)(v.value0)(noteMap);
@@ -1187,15 +1198,15 @@ var $$eval = function (v) {
                         return Data_Set.map(Note.ordNote)(Data_Function.flip(Note.incNoteBy)(d))(v3);
                     })(change);
                     return Control_Bind.discard(Control_Bind.discardUnit)(Halogen_Query_HalogenM.bindHalogenM)(Control_Monad_State_Class.modify_(Halogen_Query_HalogenM.monadStateHalogenM)(function (v4) {
-                        var $76 = {};
-                        for (var $77 in v4) {
-                            if ({}.hasOwnProperty.call(v4, $77)) {
-                                $76[$77] = v4[$77];
+                        var $83 = {};
+                        for (var $84 in v4) {
+                            if ({}.hasOwnProperty.call(v4, $84)) {
+                                $83[$84] = v4[$84];
                             };
                         };
-                        $76.currentNote = new Data_Maybe.Just(v1.value0);
-                        $76.filteredNotes = newFilter;
-                        return $76;
+                        $83.currentNote = new Data_Maybe.Just(v1.value0);
+                        $83.filteredNotes = newFilter;
+                        return $83;
                     }))(function () {
                         return Control_Bind.bind(Halogen_Query_HalogenM.bindHalogenM)(Control_Monad_State_Class.gets(Halogen_Query_HalogenM.monadStateHalogenM)(getFilteredChord))(function (v4) {
                             if (v4 instanceof Data_Maybe.Nothing) {
@@ -1210,13 +1221,13 @@ var $$eval = function (v) {
                                     });
                                 });
                             };
-                            throw new Error("Failed pattern match at Component.App line 227, column 9 - line 232, column 22: " + [ v4.constructor.name ]);
+                            throw new Error("Failed pattern match at Component.App line 230, column 9 - line 235, column 22: " + [ v4.constructor.name ]);
                         });
                     });
                 });
             });
         };
-        throw new Error("Failed pattern match at Component.App line 215, column 5 - line 232, column 22: " + [ v1.constructor.name ]);
+        throw new Error("Failed pattern match at Component.App line 218, column 5 - line 235, column 22: " + [ v1.constructor.name ]);
     };
     if (v instanceof ToggleShowColor) {
         return Control_Bind.bind(Halogen_Query_HalogenM.bindHalogenM)(Control_Monad_State_Class.gets(Halogen_Query_HalogenM.monadStateHalogenM)(function (v1) {
@@ -1227,14 +1238,14 @@ var $$eval = function (v) {
             }))(function (v2) {
                 var nowShow = !v2;
                 return Control_Bind.discard(Control_Bind.discardUnit)(Halogen_Query_HalogenM.bindHalogenM)(Control_Monad_State_Class.modify_(Halogen_Query_HalogenM.monadStateHalogenM)(function (v3) {
-                    var $88 = {};
-                    for (var $89 in v3) {
-                        if ({}.hasOwnProperty.call(v3, $89)) {
-                            $88[$89] = v3[$89];
+                    var $95 = {};
+                    for (var $96 in v3) {
+                        if ({}.hasOwnProperty.call(v3, $96)) {
+                            $95[$96] = v3[$96];
                         };
                     };
-                    $88.showColor = nowShow;
-                    return $88;
+                    $95.showColor = nowShow;
+                    return $95;
                 }))(function () {
                     return Control_Bind.bind(Halogen_Query_HalogenM.bindHalogenM)(Halogen_Query.query(eqSlot)(new Slot(v1))(Halogen_Query.request(Component_Guitar.ShowColor.create(nowShow))))(function (v3) {
                         return Control_Applicative.pure(Halogen_Query_HalogenM.applicativeHalogenM)(v.value0);
@@ -1248,21 +1259,21 @@ var $$eval = function (v) {
             return v1.filteredNotes;
         }))(function (v1) {
             var newFilter = (function () {
-                var $93 = Data_Set.member(Note.ordNote)(v.value0)(v1);
-                if ($93) {
+                var $100 = Data_Set.member(Note.ordNote)(v.value0)(v1);
+                if ($100) {
                     return Data_Set["delete"](Note.ordNote)(v.value0)(v1);
                 };
                 return Data_Set.insert(Note.ordNote)(v.value0)(v1);
             })();
             return Control_Bind.discard(Control_Bind.discardUnit)(Halogen_Query_HalogenM.bindHalogenM)(Control_Monad_State_Class.modify_(Halogen_Query_HalogenM.monadStateHalogenM)(function (v2) {
-                var $94 = {};
-                for (var $95 in v2) {
-                    if ({}.hasOwnProperty.call(v2, $95)) {
-                        $94[$95] = v2[$95];
+                var $101 = {};
+                for (var $102 in v2) {
+                    if ({}.hasOwnProperty.call(v2, $102)) {
+                        $101[$102] = v2[$102];
                     };
                 };
-                $94.filteredNotes = newFilter;
-                return $94;
+                $101.filteredNotes = newFilter;
+                return $101;
             }))(function () {
                 return Control_Bind.bind(Halogen_Query_HalogenM.bindHalogenM)(Control_Monad_State_Class.gets(Halogen_Query_HalogenM.monadStateHalogenM)(getFilteredChord))(function (v2) {
                     if (v2 instanceof Data_Maybe.Just) {
@@ -1277,7 +1288,7 @@ var $$eval = function (v) {
                     if (v2 instanceof Data_Maybe.Nothing) {
                         return Control_Applicative.pure(Halogen_Query_HalogenM.applicativeHalogenM)(v.value1);
                     };
-                    throw new Error("Failed pattern match at Component.App line 247, column 5 - line 252, column 27: " + [ v2.constructor.name ]);
+                    throw new Error("Failed pattern match at Component.App line 250, column 5 - line 255, column 27: " + [ v2.constructor.name ]);
                 });
             });
         });
@@ -1285,7 +1296,7 @@ var $$eval = function (v) {
     if (v instanceof HandleGuitar) {
         return Control_Applicative.pure(Halogen_Query_HalogenM.applicativeHalogenM)(v.value0);
     };
-    throw new Error("Failed pattern match at Component.App line 186, column 8 - line 254, column 10: " + [ v.constructor.name ]);
+    throw new Error("Failed pattern match at Component.App line 186, column 8 - line 257, column 10: " + [ v.constructor.name ]);
 };
 var render = function (state) {
     var renderInterval = function (interval) {
@@ -1295,15 +1306,15 @@ var render = function (state) {
             return state.showColor || Chord.getInterval(x) === 0;
         };
         var f = function (i) {
-            var $104 = filterInterval(i);
-            if ($104) {
+            var $111 = filterInterval(i);
+            if ($111) {
                 return Component_FretColor.fretColor(Chord.getInterval(i));
             };
             return "black";
         };
         var class_ = (function () {
-            var $105 = isFiltered(state)(Chord.getNote(interval));
-            if ($105) {
+            var $112 = isFiltered(state)(Chord.getNote(interval));
+            if ($112) {
                 return "filtered";
             };
             return "unfiltered";
@@ -1341,8 +1352,8 @@ var render = function (state) {
             return "Hide";
         };
         return "Show";
-    })() + " Interval Colors")("plain")(ToggleShowColor.create) ])(Data_Maybe.maybe([  ])(function ($107) {
-        return Data_Array.singleton(renderIntervalChart(Chord.chordToIntervals($107)));
+    })() + " Interval Colors")("plain")(ToggleShowColor.create) ])(Data_Maybe.maybe([  ])(function ($114) {
+        return Data_Array.singleton(renderIntervalChart(Chord.chordToIntervals($114)));
     })(getChord(state)))) ]);
     return Halogen_HTML_Elements.div([ Halogen_HTML_Properties.class_("pure-g") ])([ renderSidebar, Halogen_HTML_Elements.div([ Halogen_HTML_Properties.class_("pure-u-1 pure-u-md-1-2 pure-u-lg-2-3") ])([ Halogen_HTML.slot(new Slot(state.slot))(Component_Guitar.component)(state.currentGuitar)(Halogen_HTML_Events.input_(HandleGuitar.create)) ]) ]);
 };

@@ -186,17 +186,20 @@ eval :: forall m. Query ~> H.ParentDSL State Query CG.Query Slot Void m
 eval = case _ of
   ChangeGuitar name next -> do
     let mguitar = M.lookup name guitarMap
-    maybe (pure next) (\guitar -> do
-                          H.modify_ (_ { currentGuitar = guitar
-                                       , slot = name
-                                       })
-                          thisChord <- H.gets getFilteredChord
-                          case thisChord of
-                            Just chord ->  do
-                              _ <- H.query (Slot name) $ H.request (CG.ShowChord chord)
-                              pure next
-                            Nothing -> pure next
-                      ) mguitar
+    case M.lookup name guitarMap of
+      Nothing -> pure next
+      Just guitar -> do
+        H.modify_ (_ { currentGuitar = guitar
+                     , slot = name
+                     })
+        thisChord <- H.gets getFilteredChord
+        case thisChord of
+          Nothing -> pure next
+          Just chord ->  do
+            _ <- H.query (Slot name) $ H.request (CG.ShowChord chord)
+            showColor <- H.gets (_.showColor)
+            _ <- H.query (Slot name) $ H.request (CG.ShowColor showColor)
+            pure next
   ChangeChord name next -> do
     case M.lookup name chordMap of
       Nothing -> pure next
