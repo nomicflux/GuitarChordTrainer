@@ -87,13 +87,13 @@ render :: forall m. State -> H.ParentHTML Query CG.Query Slot m
 render state =
   HH.div [ HP.class_ $ HH.ClassName "pure-g" ]
   [ renderSidebar
-  ,  HH.div [ HP.class_ $ HH.ClassName "pure-u-2-3" ]
+  ,  HH.div [ HP.class_ $ HH.ClassName "pure-u pure-u-sm-1 pure-u-md-2-3" ]
      [ HH.slot (Slot state.slot) CG.component state.currentGuitar $ HE.input_ HandleGuitar ]
   ]
   where
     renderSidebar :: H.ParentHTML Query CG.Query Slot m
     renderSidebar =
-      HH.div [ HP.class_ $ HH.ClassName "pure-u pure-u-1-3" ]
+      HH.div [ HP.class_ $ HH.ClassName "pure-u pure-u-sm-1 pure-u-md-1-3" ]
       [ HH.form [ HP.class_ $ HH.ClassName "pure-form" ] $
         [ mkSelect "Tuning" guitarMap (Just state.slot) ChangeGuitar
         , mkSelect "Chord" chordMap Nothing ChangeChord
