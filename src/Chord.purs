@@ -60,6 +60,29 @@ dom7thFlat13th = Chord (fromFoldable [I.majorThird, I.minorThird, I.minorThird, 
 dom7th13th :: Chord
 dom7th13th = Chord (fromFoldable [I.majorThird, I.minorThird, I.minorThird, I.majorSeventh])
 
+sus4 :: Chord
+sus4 = Chord (fromFoldable [I.fourth, I.majorSecond])
+
+sus2 :: Chord
+sus2 = Chord (fromFoldable [I.majorSecond, I.fourth])
+
+sixth :: Chord
+sixth = Chord (fromFoldable [I.majorThird, I.fourth])
+
+allNotes :: Chord
+allNotes = Chord (fromFoldable [ I.minorSecond
+                               , I.minorSecond
+                               , I.minorSecond
+                               , I.minorSecond
+                               , I.minorSecond
+                               , I.minorSecond
+                               , I.minorSecond
+                               , I.minorSecond
+                               , I.minorSecond
+                               , I.minorSecond
+                               , I.minorSecond
+                               ])
+
 allChords :: Array (Tagged Chord)
 allChords = [ Tagged "Major" majorChord
             , Tagged "Minor" minorChord
@@ -76,6 +99,10 @@ allChords = [ Tagged "Major" majorChord
             , Tagged "Dominant #9" dom7thSharp9th
             , Tagged "Dominant b13" dom7thFlat13th
             , Tagged "Dominant 13th" dom7th13th
+            , Tagged "Suspended 2nd" sus2
+            , Tagged "Suspended 4th" sus4
+            , Tagged "6th" sixth
+            , Tagged "Custom" allNotes
             ]
 
 type ThisChord = { rootNote :: Note, chord :: Set Note }
