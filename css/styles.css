@@ -75,7 +75,7 @@ body {
     padding: 10px;
 }
 
-@media only screen and (max-width: 768px) {
+@media only screen and (max-device-width: 812px) {
     .gct-select-div {
         font-size: 1.3em;
     }
