@@ -24,7 +24,7 @@ standardGuitar :: Guitar
 standardGuitar = mkGuitar [N.E, N.A, N.D, N.G, N.B, N.E]
 
 dropD :: Guitar
-dropD = mkGuitar [N.D, N.A, N.D, N.G, N.B, N.D]
+dropD = mkGuitar [N.D, N.A, N.D, N.G, N.B, N.E]
 
 openG :: Guitar
 openG = mkGuitar [N.D, N.G, N.D, N.G, N.B, N.D]
