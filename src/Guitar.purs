@@ -7,6 +7,7 @@ import Interval (Interval)
 import Note (Note)
 import Note as N
 import Prelude ((<$>), (-))
+import Tagged (Tagged(..))
 
 type Guitar = { strings :: Array GuitarString }
 
@@ -42,6 +43,17 @@ mandolin = mkGuitar [N.G, N.D, N.A, N.E]
 
 standard5StringBanjo :: Guitar
 standard5StringBanjo = mkGuitar [N.G, N.D, N.G, N.B, N.D]
+
+allGuitars :: Array (Tagged Guitar)
+allGuitars = [ Tagged "Standard Tuning" standardGuitar
+             , Tagged "Drop D Tuning" dropD
+             , Tagged "Open G Tuning" openG
+             , Tagged "Standard 7 String" standard7String
+             , Tagged "Standard 8 String" standard8String
+             , Tagged "Mandolin" mandolin
+             , Tagged "Ukulele" ukulele
+             , Tagged "Standard 5 String Banjo" standard5StringBanjo
+             ]
 
 transposeGuitarUp :: Interval -> Guitar -> Guitar
 transposeGuitarUp interval guitar =

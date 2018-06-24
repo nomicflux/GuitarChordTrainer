@@ -16,7 +16,8 @@ import Halogen.HTML as HH
 import Halogen.HTML.Events as HE
 import Note as N
 
-data Query a = AddChord ThisChord a | HandleString Int GuitarString a
+data Query a = ShowChord ThisChord (Unit -> a)
+             | HandleString Int GuitarString a
 
 data Slot = Slot Int
 
@@ -32,7 +33,9 @@ initialState = { guitar: _
                , numFrets: 24
                }
 
-component :: forall m. H.Component HH.HTML Query Guitar Void m
+data Message = NoOp
+
+component :: forall m. H.Component HH.HTML Query Guitar Message m
 component =
   H.parentComponent
   { initialState: initialState
@@ -86,7 +89,7 @@ render state =
     renderedOctaveFrets = renderOctaveFret numStrings `A.concatMap` octaveFrets
     renderedStrings = A.mapWithIndex (renderString state.numFrets numStrings) state.guitar.strings
   in
-   HH.div [ HE.onClick $ HE.input_ $ AddChord (C.generateChord C.minorChord N.E)] $
+   HH.div_
    [ SVG.svg [ SVG.height height
              , SVG.width width
              , SVG.viewBox $ A.intercalate " " [ "0 0"
@@ -96,13 +99,16 @@ render state =
              ] $ renderedKeyFrets <> renderedOctaveFrets <> renderedStrings
    ]
 
-eval :: forall m. Query ~> H.ParentDSL State Query GS.Query Slot Void m
+eval :: forall m. Query ~> H.ParentDSL State Query GS.Query Slot Message m
 eval = case _ of
-  AddChord chord next -> do
+  ShowChord chord next -> do
     strings <- H.gets (_.guitar.strings)
     let numStrings = A.length strings
-        pushNotes _ id = H.query (Slot id) $ H.request (GS.PushNotes chord.chord)
-    _ <- A.foldM pushNotes Nothing (A.range 0 $ numStrings - 1)
-    pure next
+        reset _ id = H.query (Slot id) $ H.request GS.Reset
+        pushNotes _ id = H.query (Slot id) $ H.request (GS.PushChord chord)
+        ids = (A.range 0 $ numStrings - 1)
+    _ <- A.foldM reset Nothing ids
+    _ <- A.foldM pushNotes Nothing ids
+    pure $ next unit
   HandleString id string next -> do
     pure next

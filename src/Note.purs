@@ -1,8 +1,8 @@
 module Note where
 
-import Prelude ((-), (+), class Show, class Eq, (==), class Ord, otherwise)
-
 import Interval (Interval)
+import Prelude (class Eq, class Ord, class Show, otherwise, show, (+), (-), (<$>), (==))
+import Tagged (Tagged(..))
 
 data Note = A | AsBb | B | C | CsDb | D | DsEb | E | F | FsGb | G | GsAb
 
@@ -63,3 +63,9 @@ noteDistance :: Note -> Note -> Interval
 noteDistance from to
   | from == to = 0
   | otherwise = 1 + (noteDistance (incNote from) to)
+
+noteToTag :: Note -> Tagged Note
+noteToTag note = Tagged (show note) note
+
+allNotes :: Array (Tagged Note)
+allNotes = noteToTag <$> [A, AsBb, B, C, CsDb, D, DsEb, E, F, FsGb, G, GsAb]
