@@ -3,7 +3,7 @@
 Lets the user find chords over the fretboard of guitars or other fretted instruments in any tuning, and colors the notes
 by interval.
 
-![Screenshot](img/sample.png)
+![Screenshot](img/screenshot.png)
 
 ### To-Do
 
