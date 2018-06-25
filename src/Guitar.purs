@@ -60,7 +60,7 @@ allGuitars = [ Tagged "Standard Tuning" standardGuitar
              , Tagged "Ukulele" ukulele
              , Tagged "Standard 5 String Banjo" standard5StringBanjo
              , Tagged "Standard 4 String Bass" bass
-             , Tagged "Standard 5 String Bass" bass
+             , Tagged "Standard 5 String Bass" fiveStringBass
              ]
 
 transposeGuitarUp :: Interval -> Guitar -> Guitar
