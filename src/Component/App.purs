@@ -9,7 +9,7 @@ import Component.Constants (pushedFretRadius)
 import Component.FretColor (fretColor)
 import Component.Guitar as CG
 import Component.SVG as SVG
-import Data.Array ((!!))
+import Data.Array ((!!), (:))
 import Data.Array as A
 import Data.Map (Map)
 import Data.Map as M
@@ -164,13 +164,14 @@ render state =
     mkSelect label items value query =
       let
         keys = A.fromFoldable $ M.keys items
+        defaultOption = mkOption ""
       in
        HH.div [ HP.class_ $ HH.ClassName "gct-select-div" ]
        [ HH.label [HP.for label] [ HH.text $ label <> ": " ]
        , HH.select ([ HP.name label
                     , HE.onValueChange (HE.input query)
                     ] <> (maybe [] (\v -> [HP.value v]) value)
-)         (mkOption <$> keys)
+)         (defaultOption : (mkOption <$> keys))
        ]
 
 guitarMap :: Map String Guitar
@@ -202,7 +203,11 @@ eval = case _ of
             pure next
   ChangeChord name next -> do
     case M.lookup name chordMap of
-      Nothing -> pure next
+      Nothing -> do
+        H.modify_ (_ { currentChord = Nothing
+                     , filteredNotes = emptyFilter
+                     })
+        pure next
       Just newChord -> do
         H.modify_ (_ { currentChord = Just newChord
                      , filteredNotes = emptyFilter
@@ -216,7 +221,11 @@ eval = case _ of
             pure next
   ChangeNote name next -> do
     case M.lookup name noteMap of
-      Nothing -> pure next
+      Nothing -> do
+        H.modify_ (_ { currentNote = Nothing
+                     , filteredNotes = emptyFilter
+                     })
+        pure next
       Just newNote -> do
         oldNote <- H.gets (_.currentNote)
         filteredNotes <- H.gets (_.filteredNotes)
