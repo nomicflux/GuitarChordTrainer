@@ -35,6 +35,9 @@ standard7String = mkGuitar [N.B, N.E, N.A, N.D, N.G, N.B, N.E]
 standard8String :: Guitar
 standard8String = mkGuitar [N.FsGb, N.B, N.E, N.A, N.D, N.G, N.B, N.E]
 
+dropE8String :: Guitar
+dropE8String = mkGuitar [N.E, N.B, N.E, N.A, N.D, N.G, N.B, N.E]
+
 ukulele :: Guitar
 ukulele = mkGuitar [N.G, N.C, N.E, N.A]
 
@@ -50,17 +53,22 @@ bass = mkGuitar [N.E, N.A, N.D, N.G]
 fiveStringBass :: Guitar
 fiveStringBass = mkGuitar [N.B, N.E, N.A, N.D, N.G]
 
+allFourths :: Guitar
+allFourths = mkGuitar [N.E, N.A, N.D, N.G, N.C, N.F]
+
 allGuitars :: Array (Tagged Guitar)
 allGuitars = [ Tagged "Standard Tuning" standardGuitar
              , Tagged "Drop D Tuning" dropD
              , Tagged "Open G Tuning" openG
-             , Tagged "Standard 7 String" standard7String
-             , Tagged "Standard 8 String" standard8String
+             , Tagged "All Fourths" allFourths
+             , Tagged "7 String Guitar" standard7String
+             , Tagged "8 String Guitar" standard8String
+             , Tagged "Drop E 8 String" dropE8String
              , Tagged "Mandolin" mandolin
              , Tagged "Ukulele" ukulele
-             , Tagged "Standard 5 String Banjo" standard5StringBanjo
-             , Tagged "Standard 4 String Bass" bass
-             , Tagged "Standard 5 String Bass" fiveStringBass
+             , Tagged "Banjo" standard5StringBanjo
+             , Tagged "Bass" bass
+             , Tagged "5 String Bass" fiveStringBass
              ]
 
 transposeGuitarUp :: Interval -> Guitar -> Guitar
