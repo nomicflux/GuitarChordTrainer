@@ -56,6 +56,15 @@ fiveStringBass = mkGuitar [N.B, N.E, N.A, N.D, N.G]
 allFourths :: Guitar
 allFourths = mkGuitar [N.E, N.A, N.D, N.G, N.C, N.F]
 
+majorThirds :: Guitar
+majorThirds = mkGuitar [N.GsAb, N.C, N.E, N.GsAb, N.C, N.E]
+
+majorThirds7String :: Guitar
+majorThirds7String = mkGuitar [N.E, N.GsAb, N.C, N.E, N.GsAb, N.C, N.E]
+
+majorThirds8String :: Guitar
+majorThirds8String = mkGuitar [N.C, N.E, N.GsAb, N.C, N.E, N.GsAb, N.C, N.E]
+
 allGuitars :: Array (Tagged Guitar)
 allGuitars = [ Tagged "Standard Tuning" standardGuitar
              , Tagged "Drop D Tuning" dropD
@@ -69,6 +78,9 @@ allGuitars = [ Tagged "Standard Tuning" standardGuitar
              , Tagged "Banjo" standard5StringBanjo
              , Tagged "Bass" bass
              , Tagged "5 String Bass" fiveStringBass
+             , Tagged "Major 3rds" majorThirds
+             , Tagged "Major 3rds 7 String" majorThirds7String
+             , Tagged "Major 3rds 8 String" majorThirds8String
              ]
 
 transposeGuitarUp :: Interval -> Guitar -> Guitar
