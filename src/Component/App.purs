@@ -5,7 +5,7 @@ import Prelude
 import Chord (Chord, IntervalledNote, ThisChord)
 import Chord as C
 import Chord as I
-import Component.Constants (pushedFretRadius)
+import Component.Constants (bodyRef, pushedFretRadius)
 import Component.FretColor (fretColor)
 import Component.Guitar as CG
 import Component.SVG as SVG

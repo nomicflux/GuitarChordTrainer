@@ -6,6 +6,7 @@ import Chord (ThisChord)
 import Component.Constants (fretHeight, fretMarkerRadius, fretWidth, halfFretHeight, lineHeight, stringLength)
 import Component.GuitarString as GS
 import Component.SVG as SVG
+import Component.Scroll (getScrollTop)
 import Data.Array as A
 import Data.Int (round, toNumber)
 import Data.Maybe (Maybe(..), fromMaybe)
@@ -19,7 +20,9 @@ import Halogen.HTML as HH
 import Halogen.HTML.Events as HE
 import Halogen.HTML.Properties as HP
 import Note (Note)
-import Web.HTML.HTMLElement as DOM
+import Web.DOM.Document as DOC
+import Web.DOM.Element as DOM
+import Web.HTML.HTMLElement as DOMHTML
 import Web.UIEvent.MouseEvent (MouseEvent)
 import Web.UIEvent.MouseEvent as ME
 
@@ -39,11 +42,13 @@ derive instance ordSlot :: Ord Slot
 
 type State = { guitar :: Guitar
              , numFrets :: Int
+             , scrollY :: Int
              }
 
 initialState :: Guitar -> State
 initialState = { guitar: _
                , numFrets: 24
+               , scrollY: 0
                }
 
 data Message = Selected (Set Note)
@@ -141,15 +146,16 @@ eval = case _ of
     H.getHTMLElementRef containerRef >>= case _ of
       Nothing -> pure unit
       Just el -> do
+        scrollTop <- H.liftEffect getScrollTop
         offsetLeft <- H.liftEffect do
-          rect <- DOM.getBoundingClientRect el
+          rect <- DOMHTML.getBoundingClientRect el
           pure $ rect.left
         offsetTop <- H.liftEffect do
-          rect <- DOM.getBoundingClientRect el
+          rect <- DOMHTML.getBoundingClientRect el
           pure $ rect.top
         let
           x = (toNumber $ ME.pageX event) - offsetLeft
-          y = (toNumber $ ME.pageY event) - offsetTop
+          y = (toNumber $ ME.pageY event) - offsetTop - scrollTop
           string = round $ x / (toNumber fretWidth) - 0.5
           fret = round $ y / (toNumber fretHeight) - 0.5
         _ <- H.query (Slot string) $ H.request (GS.ToggleFret fret)

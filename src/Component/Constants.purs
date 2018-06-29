@@ -1,12 +1,13 @@
 module Component.Constants where
 
+import Halogen as H
 import Prelude ((*), (+), (/))
 
 pushedFretRadius :: Int
 pushedFretRadius = 7
 
 fretMarkerRadius :: Int
-fretMarkerRadius = 8
+fretMarkerRadius = 9
 
 fretWidth :: Int
 fretWidth = 40
@@ -25,3 +26,6 @@ lineHeight fret = (fret + 1) * fretWidth
 
 stringLength :: Int -> Int
 stringLength frets = lineHeight frets
+
+bodyRef :: H.RefLabel
+bodyRef = H.RefLabel "MainBody"
