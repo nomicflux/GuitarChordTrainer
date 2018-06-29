@@ -6,7 +6,7 @@ import Chord (ThisChord)
 import Component.Constants (fretHeight, fretMarkerRadius, fretWidth, halfFretHeight, lineHeight, stringLength)
 import Component.GuitarString as GS
 import Component.SVG as SVG
-import Component.Scroll (getScrollTop)
+import Component.Scroll (getScrollTop, getScrollLeft)
 import Data.Array as A
 import Data.Int (round, toNumber)
 import Data.Maybe (Maybe(..), fromMaybe)
@@ -20,8 +20,6 @@ import Halogen.HTML as HH
 import Halogen.HTML.Events as HE
 import Halogen.HTML.Properties as HP
 import Note (Note)
-import Web.DOM.Document as DOC
-import Web.DOM.Element as DOM
 import Web.HTML.HTMLElement as DOMHTML
 import Web.UIEvent.MouseEvent (MouseEvent)
 import Web.UIEvent.MouseEvent as ME
@@ -147,6 +145,7 @@ eval = case _ of
       Nothing -> pure unit
       Just el -> do
         scrollTop <- H.liftEffect getScrollTop
+        scrollLeft <- H.liftEffect getScrollLeft
         offsetLeft <- H.liftEffect do
           rect <- DOMHTML.getBoundingClientRect el
           pure $ rect.left
@@ -154,7 +153,7 @@ eval = case _ of
           rect <- DOMHTML.getBoundingClientRect el
           pure $ rect.top
         let
-          x = (toNumber $ ME.pageX event) - offsetLeft
+          x = (toNumber $ ME.pageX event) - offsetLeft - scrollLeft
           y = (toNumber $ ME.pageY event) - offsetTop - scrollTop
           string = round $ x / (toNumber fretWidth) - 0.5
           fret = round $ y / (toNumber fretHeight) - 0.5
