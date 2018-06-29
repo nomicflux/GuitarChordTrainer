@@ -32,6 +32,9 @@ line props = svgElement (ElemName "line") props []
 width :: forall r i. Int -> IProp (width :: Int | r) i
 width = attr (AttrName "width") <<< show
 
+strokeWidth :: forall r i. Int -> IProp (strokeWidth :: Int | r) i
+strokeWidth = attr (AttrName "stroke-width") <<< show
+
 height :: forall r i. Int -> IProp (height :: Int | r) i
 height = attr (AttrName "height") <<< show
 

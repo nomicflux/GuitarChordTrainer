@@ -3,7 +3,7 @@ module Component.GuitarString where
 import Prelude
 
 import Chord (ThisChord)
-import Component.Constants (fretHeight, halfFretWidth, halfStringWidth, pushedFretRadius)
+import Component.Constants (halfFretHeight, halfFretWidth, lineHeight, pushedFretRadius)
 import Component.FretColor (fretColor)
 import Component.SVG as SVG
 import Data.Array ((:))
@@ -13,7 +13,7 @@ import Data.List as L
 import Data.Maybe (Maybe(..), maybe)
 import Data.Set (Set)
 import Data.Set as S
-import GuitarString (Fret, GuitarString, findFret)
+import GuitarString (GuitarString, findFret)
 import Halogen as H
 import Halogen.HTML as HH
 import Note (Note)
@@ -24,7 +24,16 @@ data FrettedNote = FrettedNote { fret :: Int
                                }
 derive instance eqFrettedNote :: Eq FrettedNote
 instance ordFrettedNote :: Ord FrettedNote where
-  compare (FrettedNote a) (FrettedNote b) = a.fret `compare` b.fret
+  compare (FrettedNote a) (FrettedNote b) =
+    if a.fret == b.fret
+    then a.fromRoot `compare` b.fromRoot
+    else a.fret `compare` b.fret
+
+getFret :: FrettedNote -> Int
+getFret (FrettedNote fret) = fret.fret
+
+getInterval :: FrettedNote -> Maybe Int
+getInterval (FrettedNote fret) = fret.fromRoot
 
 type Input = { string :: GuitarString
              , numFrets :: Int
@@ -35,6 +44,7 @@ type Input = { string :: GuitarString
 
 type State = { string :: GuitarString
              , frets :: Set FrettedNote
+             , toggled :: Set Int
              , numFrets :: Int
              , x :: Int
              , onLeft :: Boolean
@@ -45,6 +55,7 @@ type State = { string :: GuitarString
 initialState :: Input -> State
 initialState input = { string: input.string
                      , frets: S.empty
+                     , toggled: S.empty
                      , numFrets: input.numFrets
                      , x: input.x
                      , onLeft: input.onLeft
@@ -52,12 +63,12 @@ initialState input = { string: input.string
                      , showColor: true
                      }
 
-data Query a = PushFret Fret (Unit -> a)
-             | ReleaseFret Fret (Unit -> a)
+data Query a = ToggleFret Int (Unit -> a)
              | PushChord ThisChord (Unit -> a)
-             | ReleaseChord ThisChord (Unit -> a)
              | ShowColor Boolean (Unit -> a)
-             | Reset (Unit -> a)
+             | GetNotes (Set Note -> a)
+             | ResetChord (Unit -> a)
+             | ResetToggled (Unit -> a)
 
 component :: forall m. H.Component HH.HTML Query Input Void m
 component =
@@ -72,18 +83,6 @@ fretColorLess :: Int -> String
 fretColorLess interval =
   if interval == 0 then "red" else "black"
 
-renderPushedFret :: forall p i. Boolean -> Int -> FrettedNote -> HH.HTML p i
-renderPushedFret showColor x (FrettedNote fret) =
-  let f = if showColor then fretColor else fretColorLess
-  in
-   SVG.circle [ SVG.cx $ halfStringWidth + x
-              , SVG.cy $ fretHeight fret.fret - halfFretWidth
-              , SVG.r pushedFretRadius
-              , SVG.stroke "black"
-              , SVG.fill $ maybe "black" f fret.fromRoot
-              , SVG.class_ "pushed-fret"
-              ]
-
 renderFret :: forall p i. Int -> Boolean -> Boolean -> Int -> Array (HH.HTML p i)
 renderFret x onLeft onRight fret =
   let left = if onLeft then [renderLeftFret x fret] else []
@@ -92,35 +91,55 @@ renderFret x onLeft onRight fret =
 
 renderLeftFret :: forall p i. Int -> Int -> HH.HTML p i
 renderLeftFret x fret = SVG.line [ SVG.x1 $ x
-                                 , SVG.x2 $ halfStringWidth + x
-                                 , SVG.y1 $ fretHeight fret
-                                 , SVG.y2 $ fretHeight fret
+                                 , SVG.x2 $ halfFretWidth + x
+                                 , SVG.y1 $ lineHeight fret
+                                 , SVG.y2 $ lineHeight fret
                                  , SVG.stroke "black"
                                  , SVG.class_ "fret"
                                  ]
 
 renderRightFret :: forall p i. Int -> Int -> HH.HTML p i
-renderRightFret x fret = SVG.line [ SVG.x1 $ halfStringWidth + x
-                                  , SVG.x2 $ halfStringWidth * 2 + x
-                                  , SVG.y1 $ fretHeight fret
-                                  , SVG.y2 $ fretHeight fret
+renderRightFret x fret = SVG.line [ SVG.x1 $ halfFretWidth + x
+                                  , SVG.x2 $ halfFretWidth * 2 + x
+                                  , SVG.y1 $ lineHeight fret
+                                  , SVG.y2 $ lineHeight fret
                                   , SVG.stroke "black"
                                   , SVG.class_ "fret"
                                   ]
 
 render :: State -> H.ComponentHTML Query
 render state =
-   SVG.svg [] (renderString state.frets)
+   SVG.svg [ ] (renderString state.frets)
    where
      renderString :: forall p i. Set FrettedNote -> Array (HH.HTML p i)
      renderString frets =
-       SVG.line [ SVG.x1 $ halfStringWidth + state.x
-                , SVG.y1 $ fretHeight 0
-                , SVG.x2 $ halfStringWidth + state.x
-                , SVG.y2 $ fretHeight state.numFrets
+       SVG.line [ SVG.x1 $ halfFretWidth + state.x
+                , SVG.y1 $ lineHeight 0
+                , SVG.x2 $ halfFretWidth + state.x
+                , SVG.y2 $ lineHeight state.numFrets
                 , SVG.stroke "black"
                 , SVG.class_ "string"
-                ] : (renderPushedFret state.showColor state.x <$> A.fromFoldable frets) <> (renderFret state.x state.onLeft state.onRight `A.concatMap` A.range 0 (state.numFrets + 1))
+                ] : (renderPushedFret <$> A.fromFoldable frets) <> (renderToggledFret <$> A.fromFoldable state.toggled) <> (renderFret state.x state.onLeft state.onRight `A.concatMap` A.range 0 (state.numFrets + 1))
+
+     renderToggledFret :: forall p i. Int -> HH.HTML p i
+     renderToggledFret fretPosition =
+        SVG.circle [ SVG.cx $ halfFretWidth + state.x
+                   , SVG.cy $ lineHeight fretPosition - halfFretHeight
+                   , SVG.r pushedFretRadius
+                   , SVG.class_ "toggled-fret"
+                   ]
+
+     renderPushedFret :: forall p i. FrettedNote -> HH.HTML p i
+     renderPushedFret (FrettedNote fret) =
+       let
+         color = if state.showColor then fretColor else fretColorLess
+       in
+        SVG.circle [ SVG.cx $ halfFretWidth + state.x
+                   , SVG.cy $ lineHeight fret.fret - halfFretHeight
+                   , SVG.r pushedFretRadius
+                   , SVG.fill $ maybe "black" color fret.fromRoot
+                   , SVG.class_ "pushed-fret"
+                   ]
 
 getNotePositions :: GuitarString -> Note -> Note -> List FrettedNote
 getNotePositions string root note =
@@ -133,19 +152,15 @@ getNotePositions string root note =
 
 eval :: forall m. Query ~> H.ComponentDSL State Query Void m
 eval = case _ of
-  PushFret fret next -> do
+  ToggleFret fretPosition next -> do
     frets <- H.gets (_.frets)
+    toggled <- H.gets (_.toggled)
     let
-      frettedNote = FrettedNote { fret: fret.position, fromRoot: Nothing }
-      newFrets = S.insert frettedNote frets
-    H.modify_ (_ { frets = newFrets })
-    pure $ next unit
-  ReleaseFret fret next -> do
-    frets <- H.gets (_.frets)
-    let
-      frettedNote = FrettedNote { fret: fret.position, fromRoot: Nothing }
-      newFrets = S.delete frettedNote frets
-    H.modify_ (_ { frets = newFrets })
+      present = S.member fretPosition toggled
+      newToggled = if present
+                   then S.delete fretPosition toggled
+                   else S.insert fretPosition toggled
+    H.modify_ (_ { toggled = newToggled })
     pure $ next unit
   PushChord chord next -> do
     state <- H.get
@@ -154,19 +169,17 @@ eval = case _ of
       forState = S.union newFrets state.frets
     H.modify_ (_ { frets = forState })
     pure $ next unit
-  ReleaseChord chord next -> do
-    state <- H.get
-    let
-      newFrets = S.fromFoldable $ (getNotePositions state.string chord.rootNote) `L.concatMap` (L.fromFoldable chord.chord)
-      forState = S.difference state.frets newFrets
-    H.modify_ (_ { frets = forState })
-    pure $ next unit
   ShowColor showColor next -> do
     H.modify_ (_ {showColor = showColor})
     pure $ next unit
-  Reset next -> do
-    let
-      frets :: Set FrettedNote
-      frets = S.empty
-    H.modify_ (_ { frets = frets })
+  GetNotes reply -> do
+    toggled <- H.gets (_.toggled)
+    stringNote <- H.gets (_.string.baseNote)
+    let notes = S.map (\fret -> N.incNoteBy stringNote fret) toggled
+    pure $ reply notes
+  ResetChord next -> do
+    H.modify_ (_ { frets = S.empty :: Set FrettedNote })
+    pure $ next unit
+  ResetToggled next -> do
+    H.modify_ (_ { toggled = S.empty :: Set Int })
     pure $ next unit

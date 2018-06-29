@@ -3,21 +3,25 @@ body {
 }
 
 .fret {
-    z-index: 0;
 }
 
 .pushed-fret {
-    z-index: 3;
+    stroke: black;
+    stroke-width: 1;
+}
+
+.toggled-fret {
+    stroke: red;
+    fill: rgba(0,0,0,0.2);
+}
+
+.pushed-fret.toggled-fret {
+    stroke: red;
+    stroke-width: 3;
 }
 
 .string {
-    z-index: 2;
 }
-
-.clearing-box {
-    z-index: 1;
-}
-
 
 .button-success,
 .button-error,

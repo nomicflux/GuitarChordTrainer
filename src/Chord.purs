@@ -102,7 +102,6 @@ allChords = [ Tagged "Major" majorChord
             , Tagged "Suspended 2nd" sus2
             , Tagged "Suspended 4th" sus4
             , Tagged "6th" sixth
-            , Tagged "Custom" allNotes
             ]
 
 type ThisChord = { rootNote :: Note, chord :: Set Note }

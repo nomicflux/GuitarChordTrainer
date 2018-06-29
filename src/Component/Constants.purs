@@ -11,14 +11,17 @@ fretMarkerRadius = 6
 fretWidth :: Int
 fretWidth = 30
 
+fretHeight :: Int
+fretHeight = fretWidth
+
 halfFretWidth :: Int
 halfFretWidth = fretWidth / 2
 
-halfStringWidth :: Int
-halfStringWidth = halfFretWidth
+halfFretHeight :: Int
+halfFretHeight = halfFretWidth
 
-fretHeight :: Int -> Int
-fretHeight fret = (fret + 1) * fretWidth
+lineHeight :: Int -> Int
+lineHeight fret = (fret + 1) * fretWidth
 
 stringLength :: Int -> Int
-stringLength frets = fretHeight frets
+stringLength frets = lineHeight frets
