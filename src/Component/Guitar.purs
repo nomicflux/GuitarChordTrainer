@@ -27,6 +27,7 @@ data Query a = ShowChord ThisChord (Unit -> a)
              | ShowColor Boolean (Unit -> a)
              | ClickFret MouseEvent a
              | ClearChord (Unit -> a)
+             | ClearToggled (Unit -> a)
              | ClearAll (Unit -> a)
              | GetNotes (Set Note -> a)
              | HandleString Int GuitarString a
@@ -160,6 +161,11 @@ eval = case _ of
   ClearChord next -> do
     ids <- H.gets getSlotIds
     let reset _ id = H.query (Slot id) $ H.request GS.ResetChord
+    _ <- A.foldM reset Nothing ids
+    pure $ next unit
+  ClearToggled next -> do
+    ids <- H.gets getSlotIds
+    let reset _ id = H.query (Slot id) $ H.request GS.ResetToggled
     _ <- A.foldM reset Nothing ids
     pure $ next unit
   ClearAll next -> do

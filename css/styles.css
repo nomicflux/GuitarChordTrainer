@@ -12,12 +12,12 @@ body {
 
 .toggled-fret {
     stroke: red;
-    fill: rgba(0,0,0,0.2);
+    fill: rgba(0,0,0,0.5);
 }
 
 .pushed-fret.toggled-fret {
     stroke: red;
-    stroke-width: 3;
+    stroke-width: 4;
 }
 
 .string {
