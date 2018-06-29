@@ -147,8 +147,8 @@ render state =
       HH.div [ HP.class_ $ HH.ClassName "pure-u-1 pure-u-sm-1 pure-u-md-1-2 pure-u-lg-1-3" ]
       [ HH.form [ HP.class_ $ HH.ClassName "pure-form" ] $
         [ mkSelect tuningRefName guitarMap (M.keys guitarMap) state.slot ChangeGuitar
-        , mkSelect chordRefName chordMap (filteredChords state.currentNote state.selectedNotes) state.currentChord ChangeChord
         , mkSelect noteRefName noteMap (filteredIntervals state.selectedNotes) state.currentNote ChangeNote
+        , mkSelect chordRefName chordMap (filteredChords state.currentNote state.selectedNotes) state.currentChord ChangeChord
         , mkButton ((if state.showColor then "Hide" else "Show") <> " Interval Colors") "plain" ToggleShowColor
         , mkButton "Clear Selected Frets" "warning" ClearSelected
         , mkButton "Clear All" "error" ClearAll

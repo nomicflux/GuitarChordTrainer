@@ -3,13 +3,13 @@ module Component.Constants where
 import Prelude ((*), (+), (/))
 
 pushedFretRadius :: Int
-pushedFretRadius = 5
+pushedFretRadius = 7
 
 fretMarkerRadius :: Int
-fretMarkerRadius = 6
+fretMarkerRadius = 8
 
 fretWidth :: Int
-fretWidth = 30
+fretWidth = 40
 
 fretHeight :: Int
 fretHeight = fretWidth
