@@ -144,11 +144,14 @@ eval = case _ of
         offsetLeft <- H.liftEffect do
           rect <- DOM.getBoundingClientRect el
           pure $ rect.left
+        offsetTop <- H.liftEffect do
+          rect <- DOM.getBoundingClientRect el
+          pure $ rect.top
         let
           x = (toNumber $ ME.pageX event) - offsetLeft
-          y = ME.pageY event
+          y = (toNumber $ ME.pageY event) - offsetTop
           string = round $ x / (toNumber fretWidth) - 0.5
-          fret = round $ (toNumber y) / (toNumber fretHeight) - 1.0
+          fret = round $ y / (toNumber fretHeight) - 0.5
         _ <- H.query (Slot string) $ H.request (GS.ToggleFret fret)
         ids <- H.gets getSlotIds
         let notes acc id = do
