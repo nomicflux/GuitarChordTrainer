@@ -150,7 +150,7 @@ render state =
         , mkSelect chordRefName chordMap (filteredChords state.currentNote state.selectedNotes) state.currentChord ChangeChord
         , mkSelect noteRefName noteMap (filteredIntervals state.selectedNotes) state.currentNote ChangeNote
         , mkButton ((if state.showColor then "Hide" else "Show") <> " Interval Colors") "plain" ToggleShowColor
-        , mkButton "Clear Selected" "warning" ClearSelected
+        , mkButton "Clear Selected Frets" "warning" ClearSelected
         , mkButton "Clear All" "error" ClearAll
         ] <> maybe [] (A.singleton <<< renderIntervalChart <<< C.chordToIntervals) (getChord state)
       ]

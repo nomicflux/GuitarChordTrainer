@@ -11951,7 +11951,7 @@ var PS = {};
               return "Hide";
           };
           return "Show";
-      })() + " Interval Colors")("plain")(ToggleShowColor.create), mkButton("Clear Selected")("warning")(ClearSelected.create), mkButton("Clear All")("error")(ClearAll.create) ])(Data_Maybe.maybe([  ])(function ($155) {
+      })() + " Interval Colors")("plain")(ToggleShowColor.create), mkButton("Clear Selected Frets")("warning")(ClearSelected.create), mkButton("Clear All")("error")(ClearAll.create) ])(Data_Maybe.maybe([  ])(function ($155) {
           return Data_Array.singleton(renderIntervalChart(Chord.chordToIntervals($155)));
       })(getChord(state)))) ]);
       return Halogen_HTML_Elements.div([ Halogen_HTML_Properties.class_("pure-g") ])([ renderSidebar, Halogen_HTML_Elements.div([ Halogen_HTML_Properties.class_("pure-u-1 pure-u-md-1-2 pure-u-lg-2-3") ])([ Halogen_HTML.slot(new Slot(state.slot))(Component_Guitar.component)(state.currentGuitar)(Halogen_HTML_Events.input(HandleGuitar.create)) ]) ]);
