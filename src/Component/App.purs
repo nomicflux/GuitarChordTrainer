@@ -36,7 +36,7 @@ type State = { currentGuitar :: Guitar
              , currentNote :: String
              , slot :: String
              , showColor :: Boolean
-             , filteredNotes :: Set Note
+             , filteredIntervals :: Set Note
              , selectedNotes :: Set Note
              }
 
@@ -52,7 +52,7 @@ initialState =
    , currentNote: ""
    , slot: maybe "" T.getName mguitar
    , showColor: true
-   , filteredNotes: emptyFilter
+   , filteredIntervals: emptyFilter
    , selectedNotes: emptyFilter
    }
 
@@ -67,13 +67,13 @@ getChord state = do
 
 getFilteredChord :: State -> Maybe ThisChord
 getFilteredChord state =
-  (flip C.filterNotes) state.filteredNotes <$> getChord state
+  (flip C.filterNotes) state.filteredIntervals <$> getChord state
 
 data Query a = ChangeGuitar String a
              | ChangeChord String a
              | ChangeNote String a
              | ToggleShowColor a
-             | ToggleNote Note a
+             | ToggleInterval Note a
              | Clear a
              | HandleGuitar CG.Message a
 
@@ -91,7 +91,7 @@ component =
   }
 
 isFiltered :: State -> Note -> Boolean
-isFiltered state note = S.member note state.filteredNotes
+isFiltered state note = S.member note state.filteredIntervals
 
 isFit :: String -> String -> Set Note -> Boolean
 isFit note chord allowed =
@@ -106,8 +106,8 @@ filteredChords currentNote allowedNotes =
   else
     M.filterKeys (\k -> isFit currentNote k allowedNotes) chordMap
 
-filteredNotes :: Set Note -> Map String Note
-filteredNotes allowedNotes =
+filteredIntervals :: Set Note -> Map String Note
+filteredIntervals allowedNotes =
   if S.isEmpty allowedNotes then noteMap
   else
     let
@@ -144,7 +144,7 @@ render state =
       [ HH.form [ HP.class_ $ HH.ClassName "pure-form" ] $
         [ mkSelect tuningRefName guitarMap state.slot ChangeGuitar
         , mkSelect chordRefName (filteredChords state.currentNote state.selectedNotes) state.currentChord ChangeChord
-        , mkSelect noteRefName (filteredNotes state.selectedNotes) state.currentNote ChangeNote
+        , mkSelect noteRefName (filteredIntervals state.selectedNotes) state.currentNote ChangeNote
         , mkButton ((if state.showColor then "Hide" else "Show") <> " Interval Colors") "plain" ToggleShowColor
         , mkButton "Clear" "error" Clear
         ] <> maybe [] (A.singleton <<< renderIntervalChart <<< C.chordToIntervals) (getChord state)
@@ -163,7 +163,7 @@ render state =
       in
        HH.li
        [ HP.class_ $ HH.ClassName ("pure-menu-item restricted-height interval-key " <> class_)
-       , HE.onClick $ HE.input_ (ToggleNote (I.getNote interval))
+       , HE.onClick $ HE.input_ (ToggleInterval (I.getNote interval))
        ]
        [ SVG.svg [ SVG.width $ halfWidth * 2
                  , SVG.height $ halfHeight * 2
@@ -220,7 +220,7 @@ render state =
        [ HH.label [HP.for label] [ HH.text $ label <> ": " ]
        , HH.select ([ HP.name label
                     , HE.onValueChange (HE.input query)
-                    , HP.value value
+                    , HP.value $ if M.member value items then value else ""
                     ]
 )         (defaultOption : (mkOption <$> keys))
        ]
@@ -264,6 +264,7 @@ eval = case _ of
       Just guitar -> do
         H.modify_ (_ { currentGuitar = guitar
                      , slot = name
+                     , selectedNotes = S.empty :: Set Note
                      })
         _ <- H.query (Slot name) $ H.request CG.ClearAll
         thisChord <- H.gets getFilteredChord
@@ -278,12 +279,12 @@ eval = case _ of
     case M.lookup name chordMap of
       Nothing -> do
         H.modify_ (_ { currentChord = ""
-                     , filteredNotes = emptyFilter
+                     , filteredIntervals = emptyFilter
                      })
         pure next
       Just newChord -> do
         H.modify_ (_ { currentChord = name
-                     , filteredNotes = emptyFilter
+                     , filteredIntervals = emptyFilter
                      })
         thisChord <- H.gets getChord
         case thisChord of
@@ -296,17 +297,17 @@ eval = case _ of
     case M.lookup name noteMap of
       Nothing -> do
         H.modify_ (_ { currentNote = ""
-                     , filteredNotes = emptyFilter
+                     , filteredIntervals = emptyFilter
                      })
         pure next
       Just newNote -> do
         oldNote <- H.gets getNote
-        filteredNotes <- H.gets (_.filteredNotes)
+        filteredIntervals <- H.gets (_.filteredIntervals)
         let change = (flip N.noteDistance) newNote <$> oldNote
             newFilter =
-              maybe emptyFilter (\d -> S.map ((flip N.incNoteBy) d) filteredNotes) change
+              maybe emptyFilter (\d -> S.map ((flip N.incNoteBy) d) filteredIntervals) change
         H.modify_ (_ { currentNote = name
-                     , filteredNotes = newFilter
+                     , filteredIntervals = newFilter
                      })
         thisChord <- H.gets getFilteredChord
         case thisChord of
@@ -322,12 +323,12 @@ eval = case _ of
     H.modify_ (_ { showColor = nowShow })
     _ <- H.query (Slot slot) $ H.request (CG.ShowColor nowShow)
     pure next
-  ToggleNote note next -> do
-    filteredNotes <- H.gets (_.filteredNotes)
-    let newFilter = if S.member note filteredNotes
-                    then S.delete note filteredNotes
-                    else S.insert note filteredNotes
-    H.modify_ (_ { filteredNotes = newFilter })
+  ToggleInterval interval next -> do
+    filteredIntervals <- H.gets (_.filteredIntervals)
+    let newFilter = if S.member interval filteredIntervals
+                    then S.delete interval filteredIntervals
+                    else S.insert interval filteredIntervals
+    H.modify_ (_ { filteredIntervals = newFilter })
     thisChord <- H.gets getFilteredChord
     case thisChord of
       Just chord -> do

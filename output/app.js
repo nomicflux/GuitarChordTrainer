@@ -11736,17 +11736,17 @@ var PS = {};
       };
       return ToggleShowColor;
   })();
-  var ToggleNote = (function () {
-      function ToggleNote(value0, value1) {
+  var ToggleInterval = (function () {
+      function ToggleInterval(value0, value1) {
           this.value0 = value0;
           this.value1 = value1;
       };
-      ToggleNote.create = function (value0) {
+      ToggleInterval.create = function (value0) {
           return function (value1) {
-              return new ToggleNote(value0, value1);
+              return new ToggleInterval(value0, value1);
           };
       };
-      return ToggleNote;
+      return ToggleInterval;
   })();
   var Clear = (function () {
       function Clear(value0) {
@@ -11774,7 +11774,7 @@ var PS = {};
   var noteMap = Tagged.taggedToMap(Note.allNotes);
   var isFiltered = function (state) {
       return function (note) {
-          return Data_Set.member(Note.ordNote)(note)(state.filteredNotes);
+          return Data_Set.member(Note.ordNote)(note)(state.filteredIntervals);
       };
   };
   var guitarMap = Tagged.taggedToMap(Guitar.allGuitars);
@@ -11802,7 +11802,7 @@ var PS = {};
           currentNote: "",
           slot: Data_Maybe.maybe("")(Tagged.getName)(mguitar),
           showColor: true,
-          filteredNotes: emptyFilter,
+          filteredIntervals: emptyFilter,
           selectedNotes: emptyFilter
       };
   })();
@@ -11816,7 +11816,7 @@ var PS = {};
       });
   };
   var getFilteredChord = function (state) {
-      return Data_Functor.map(Data_Maybe.functorMaybe)(Data_Function.flip(Chord.filterNotes)(state.filteredNotes))(getChord(state));
+      return Data_Functor.map(Data_Maybe.functorMaybe)(Data_Function.flip(Chord.filterNotes)(state.filteredIntervals))(getChord(state));
   };
   var $$eval = function (v) {
       if (v instanceof ChangeGuitar) {
@@ -11835,6 +11835,7 @@ var PS = {};
                   };
                   $68.currentGuitar = v1.value0;
                   $68.slot = v.value0;
+                  $68.selectedNotes = Data_Set.empty;
                   return $68;
               }))(function () {
                   return Control_Bind.bind(Halogen_Query_HalogenM.bindHalogenM)(Halogen_Query.query(eqSlot)(new Slot(v.value0))(Halogen_Query.request(Component_Guitar.ClearAll.create)))(function (v2) {
@@ -11853,12 +11854,12 @@ var PS = {};
                                   });
                               });
                           };
-                          throw new Error("Failed pattern match at Component.App line 270, column 9 - line 276, column 22: " + [ v3.constructor.name ]);
+                          throw new Error("Failed pattern match at Component.App line 271, column 9 - line 277, column 22: " + [ v3.constructor.name ]);
                       });
                   });
               });
           };
-          throw new Error("Failed pattern match at Component.App line 262, column 5 - line 276, column 22: " + [ v1.constructor.name ]);
+          throw new Error("Failed pattern match at Component.App line 262, column 5 - line 277, column 22: " + [ v1.constructor.name ]);
       };
       if (v instanceof ChangeChord) {
           var v1 = Data_Map_Internal.lookup(Data_Ord.ordString)(v.value0)(chordMap);
@@ -11871,7 +11872,7 @@ var PS = {};
                       };
                   };
                   $79.currentChord = "";
-                  $79.filteredNotes = emptyFilter;
+                  $79.filteredIntervals = emptyFilter;
                   return $79;
               }))(function () {
                   return Control_Applicative.pure(Halogen_Query_HalogenM.applicativeHalogenM)(v.value1);
@@ -11886,7 +11887,7 @@ var PS = {};
                       };
                   };
                   $82.currentChord = v.value0;
-                  $82.filteredNotes = emptyFilter;
+                  $82.filteredIntervals = emptyFilter;
                   return $82;
               }))(function () {
                   return Control_Bind.bind(Halogen_Query_HalogenM.bindHalogenM)(Control_Monad_State_Class.gets(Halogen_Query_HalogenM.monadStateHalogenM)(getChord))(function (v2) {
@@ -11902,11 +11903,11 @@ var PS = {};
                               });
                           });
                       };
-                      throw new Error("Failed pattern match at Component.App line 289, column 9 - line 294, column 22: " + [ v2.constructor.name ]);
+                      throw new Error("Failed pattern match at Component.App line 290, column 9 - line 295, column 22: " + [ v2.constructor.name ]);
                   });
               });
           };
-          throw new Error("Failed pattern match at Component.App line 278, column 5 - line 294, column 22: " + [ v1.constructor.name ]);
+          throw new Error("Failed pattern match at Component.App line 279, column 5 - line 295, column 22: " + [ v1.constructor.name ]);
       };
       if (v instanceof ChangeNote) {
           var v1 = Data_Map_Internal.lookup(Data_Ord.ordString)(v.value0)(noteMap);
@@ -11919,7 +11920,7 @@ var PS = {};
                       };
                   };
                   $93.currentNote = "";
-                  $93.filteredNotes = emptyFilter;
+                  $93.filteredIntervals = emptyFilter;
                   return $93;
               }))(function () {
                   return Control_Applicative.pure(Halogen_Query_HalogenM.applicativeHalogenM)(v.value1);
@@ -11928,7 +11929,7 @@ var PS = {};
           if (v1 instanceof Data_Maybe.Just) {
               return Control_Bind.bind(Halogen_Query_HalogenM.bindHalogenM)(Control_Monad_State_Class.gets(Halogen_Query_HalogenM.monadStateHalogenM)(getNote))(function (v2) {
                   return Control_Bind.bind(Halogen_Query_HalogenM.bindHalogenM)(Control_Monad_State_Class.gets(Halogen_Query_HalogenM.monadStateHalogenM)(function (v3) {
-                      return v3.filteredNotes;
+                      return v3.filteredIntervals;
                   }))(function (v3) {
                       var change = Data_Functor.map(Data_Maybe.functorMaybe)(Data_Function.flip(Note.noteDistance)(v1.value0))(v2);
                       var newFilter = Data_Maybe.maybe(emptyFilter)(function (d) {
@@ -11942,7 +11943,7 @@ var PS = {};
                               };
                           };
                           $98.currentNote = v.value0;
-                          $98.filteredNotes = newFilter;
+                          $98.filteredIntervals = newFilter;
                           return $98;
                       }))(function () {
                           return Control_Bind.bind(Halogen_Query_HalogenM.bindHalogenM)(Control_Monad_State_Class.gets(Halogen_Query_HalogenM.monadStateHalogenM)(getFilteredChord))(function (v4) {
@@ -11958,13 +11959,13 @@ var PS = {};
                                       });
                                   });
                               };
-                              throw new Error("Failed pattern match at Component.App line 312, column 9 - line 317, column 22: " + [ v4.constructor.name ]);
+                              throw new Error("Failed pattern match at Component.App line 313, column 9 - line 318, column 22: " + [ v4.constructor.name ]);
                           });
                       });
                   });
               });
           };
-          throw new Error("Failed pattern match at Component.App line 296, column 5 - line 317, column 22: " + [ v1.constructor.name ]);
+          throw new Error("Failed pattern match at Component.App line 297, column 5 - line 318, column 22: " + [ v1.constructor.name ]);
       };
       if (v instanceof ToggleShowColor) {
           return Control_Bind.bind(Halogen_Query_HalogenM.bindHalogenM)(Control_Monad_State_Class.gets(Halogen_Query_HalogenM.monadStateHalogenM)(function (v1) {
@@ -11991,9 +11992,9 @@ var PS = {};
               });
           });
       };
-      if (v instanceof ToggleNote) {
+      if (v instanceof ToggleInterval) {
           return Control_Bind.bind(Halogen_Query_HalogenM.bindHalogenM)(Control_Monad_State_Class.gets(Halogen_Query_HalogenM.monadStateHalogenM)(function (v1) {
-              return v1.filteredNotes;
+              return v1.filteredIntervals;
           }))(function (v1) {
               var newFilter = (function () {
                   var $115 = Data_Set.member(Note.ordNote)(v.value0)(v1);
@@ -12009,7 +12010,7 @@ var PS = {};
                           $116[$117] = v2[$117];
                       };
                   };
-                  $116.filteredNotes = newFilter;
+                  $116.filteredIntervals = newFilter;
                   return $116;
               }))(function () {
                   return Control_Bind.bind(Halogen_Query_HalogenM.bindHalogenM)(Control_Monad_State_Class.gets(Halogen_Query_HalogenM.monadStateHalogenM)(getFilteredChord))(function (v2) {
@@ -12025,7 +12026,7 @@ var PS = {};
                       if (v2 instanceof Data_Maybe.Nothing) {
                           return Control_Applicative.pure(Halogen_Query_HalogenM.applicativeHalogenM)(v.value1);
                       };
-                      throw new Error("Failed pattern match at Component.App line 332, column 5 - line 337, column 27: " + [ v2.constructor.name ]);
+                      throw new Error("Failed pattern match at Component.App line 333, column 5 - line 338, column 27: " + [ v2.constructor.name ]);
                   });
               });
           });
@@ -12071,7 +12072,7 @@ var PS = {};
               return Control_Applicative.pure(Halogen_Query_HalogenM.applicativeHalogenM)(v.value1);
           });
       };
-      throw new Error("Failed pattern match at Component.App line 259, column 8 - line 349, column 10: " + [ v.constructor.name ]);
+      throw new Error("Failed pattern match at Component.App line 259, column 8 - line 350, column 10: " + [ v.constructor.name ]);
   };
   var allGenChords = (function () {
       var forNote = function (note) {
@@ -12107,7 +12108,7 @@ var PS = {};
           })(chordMap);
       };
   };
-  var filteredNotes = function (allowedNotes) {
+  var filteredIntervals = function (allowedNotes) {
       var $138 = Data_Set.isEmpty(allowedNotes);
       if ($138) {
           return noteMap;
@@ -12147,7 +12148,7 @@ var PS = {};
               };
               return "unfiltered";
           })();
-          return Halogen_HTML_Elements.li([ Halogen_HTML_Properties.class_("pure-menu-item restricted-height interval-key " + class_), Halogen_HTML_Events.onClick(Halogen_HTML_Events.input_(ToggleNote.create(Chord.getNote(interval)))) ])([ Component_SVG.svg([ Component_SVG.width(halfWidth * 2 | 0), Component_SVG.height(halfHeight * 2 | 0), Component_SVG.viewBox(Data_Foldable.intercalate(Data_Foldable.foldableArray)(Data_Monoid.monoidString)(" ")([ "0 0", Data_Show.show(Data_Show.showInt)(halfWidth * 2 | 0), Data_Show.show(Data_Show.showInt)(halfHeight * 2 | 0) ])) ])([ Component_SVG.circle([ Component_SVG.r(Component_Constants.pushedFretRadius), Component_SVG.cx(halfWidth), Component_SVG.cy(halfHeight), Component_SVG.fill(f(interval)), Component_SVG.stroke("black") ]) ]), Halogen_HTML_Core.text(" = " + Interval.intervalToName(Chord.getInterval(interval))) ]);
+          return Halogen_HTML_Elements.li([ Halogen_HTML_Properties.class_("pure-menu-item restricted-height interval-key " + class_), Halogen_HTML_Events.onClick(Halogen_HTML_Events.input_(ToggleInterval.create(Chord.getNote(interval)))) ])([ Component_SVG.svg([ Component_SVG.width(halfWidth * 2 | 0), Component_SVG.height(halfHeight * 2 | 0), Component_SVG.viewBox(Data_Foldable.intercalate(Data_Foldable.foldableArray)(Data_Monoid.monoidString)(" ")([ "0 0", Data_Show.show(Data_Show.showInt)(halfWidth * 2 | 0), Data_Show.show(Data_Show.showInt)(halfHeight * 2 | 0) ])) ])([ Component_SVG.circle([ Component_SVG.r(Component_Constants.pushedFretRadius), Component_SVG.cx(halfWidth), Component_SVG.cy(halfHeight), Component_SVG.fill(f(interval)), Component_SVG.stroke("black") ]) ]), Halogen_HTML_Core.text(" = " + Interval.intervalToName(Chord.getInterval(interval))) ]);
       };
       var renderIntervalChart = function (intervals) {
           var aIntervals = Data_Array.fromFoldable(Data_Set.foldableSet)(intervals);
@@ -12162,7 +12163,13 @@ var PS = {};
                   return function (query) {
                       var keys = Data_Array.fromFoldable(Data_Set.foldableSet)(Data_Map.keys(items));
                       var defaultOption = mkOption("");
-                      return Halogen_HTML_Elements.div([ Halogen_HTML_Properties.class_("gct-select-div"), Halogen_HTML_Properties.ref(label) ])([ Halogen_HTML_Elements.label([ Halogen_HTML_Properties["for"](label) ])([ Halogen_HTML_Core.text(label + ": ") ]), Halogen_HTML_Elements.select([ Halogen_HTML_Properties.name(label), Halogen_HTML_Events.onValueChange(Halogen_HTML_Events.input(query)), Halogen_HTML_Properties.value(value) ])(Data_Array.cons(defaultOption)(Data_Functor.map(Data_Functor.functorArray)(mkOption)(keys))) ]);
+                      return Halogen_HTML_Elements.div([ Halogen_HTML_Properties.class_("gct-select-div"), Halogen_HTML_Properties.ref(label) ])([ Halogen_HTML_Elements.label([ Halogen_HTML_Properties["for"](label) ])([ Halogen_HTML_Core.text(label + ": ") ]), Halogen_HTML_Elements.select([ Halogen_HTML_Properties.name(label), Halogen_HTML_Events.onValueChange(Halogen_HTML_Events.input(query)), Halogen_HTML_Properties.value((function () {
+                          var $141 = Data_Map_Internal.member(Data_Ord.ordString)(value)(items);
+                          if ($141) {
+                              return value;
+                          };
+                          return "";
+                      })()) ])(Data_Array.cons(defaultOption)(Data_Functor.map(Data_Functor.functorArray)(mkOption)(keys))) ]);
                   };
               };
           };
@@ -12174,13 +12181,13 @@ var PS = {};
               };
           };
       };
-      var renderSidebar = Halogen_HTML_Elements.div([ Halogen_HTML_Properties.class_("pure-u-1 pure-u-sm-1 pure-u-md-1-2 pure-u-lg-1-3") ])([ Halogen_HTML_Elements.form([ Halogen_HTML_Properties.class_("pure-form") ])(Data_Semigroup.append(Data_Semigroup.semigroupArray)([ mkSelect(tuningRefName)(guitarMap)(state.slot)(ChangeGuitar.create), mkSelect(chordRefName)(filteredChords(state.currentNote)(state.selectedNotes))(state.currentChord)(ChangeChord.create), mkSelect(noteRefName)(filteredNotes(state.selectedNotes))(state.currentNote)(ChangeNote.create), mkButton((function () {
+      var renderSidebar = Halogen_HTML_Elements.div([ Halogen_HTML_Properties.class_("pure-u-1 pure-u-sm-1 pure-u-md-1-2 pure-u-lg-1-3") ])([ Halogen_HTML_Elements.form([ Halogen_HTML_Properties.class_("pure-form") ])(Data_Semigroup.append(Data_Semigroup.semigroupArray)([ mkSelect(tuningRefName)(guitarMap)(state.slot)(ChangeGuitar.create), mkSelect(chordRefName)(filteredChords(state.currentNote)(state.selectedNotes))(state.currentChord)(ChangeChord.create), mkSelect(noteRefName)(filteredIntervals(state.selectedNotes))(state.currentNote)(ChangeNote.create), mkButton((function () {
           if (state.showColor) {
               return "Hide";
           };
           return "Show";
-      })() + " Interval Colors")("plain")(ToggleShowColor.create), mkButton("Clear")("error")(Clear.create) ])(Data_Maybe.maybe([  ])(function ($142) {
-          return Data_Array.singleton(renderIntervalChart(Chord.chordToIntervals($142)));
+      })() + " Interval Colors")("plain")(ToggleShowColor.create), mkButton("Clear")("error")(Clear.create) ])(Data_Maybe.maybe([  ])(function ($143) {
+          return Data_Array.singleton(renderIntervalChart(Chord.chordToIntervals($143)));
       })(getChord(state)))) ]);
       return Halogen_HTML_Elements.div([ Halogen_HTML_Properties.class_("pure-g") ])([ renderSidebar, Halogen_HTML_Elements.div([ Halogen_HTML_Properties.class_("pure-u-1 pure-u-md-1-2 pure-u-lg-2-3") ])([ Halogen_HTML.slot(new Slot(state.slot))(Component_Guitar.component)(state.currentGuitar)(Halogen_HTML_Events.input(HandleGuitar.create)) ]) ]);
   };
@@ -12199,7 +12206,7 @@ var PS = {};
   exports["ChangeChord"] = ChangeChord;
   exports["ChangeNote"] = ChangeNote;
   exports["ToggleShowColor"] = ToggleShowColor;
-  exports["ToggleNote"] = ToggleNote;
+  exports["ToggleInterval"] = ToggleInterval;
   exports["Clear"] = Clear;
   exports["HandleGuitar"] = HandleGuitar;
   exports["Slot"] = Slot;
@@ -12207,7 +12214,7 @@ var PS = {};
   exports["isFiltered"] = isFiltered;
   exports["isFit"] = isFit;
   exports["filteredChords"] = filteredChords;
-  exports["filteredNotes"] = filteredNotes;
+  exports["filteredIntervals"] = filteredIntervals;
   exports["tuningRefName"] = tuningRefName;
   exports["chordRefName"] = chordRefName;
   exports["noteRefName"] = noteRefName;
