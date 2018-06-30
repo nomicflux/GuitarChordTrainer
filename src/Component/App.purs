@@ -100,30 +100,30 @@ isFiltered state note = S.member note state.filteredIntervals
 isFit :: String -> String -> Set Note -> Boolean
 isFit note chord allowed =
   let
-    thisChord = M.lookup note allGenChords >>= M.lookup chord
+    thisChord = M.lookup chord allGenChords >>= M.lookup note
   in
    maybe false (\c -> S.intersection allowed c.chord == allowed) thisChord
 
-filteredChords :: String -> Set Note -> Set String
-filteredChords currentNote allowedNotes =
-  if S.isEmpty allowedNotes then M.keys chordMap
-  else
-    S.fromFoldable $ L.filter (\k -> isFit currentNote k allowedNotes) $ L.fromFoldable $ M.keys chordMap
-
-filteredIntervals :: Set Note -> Set String
-filteredIntervals allowedNotes =
+filteredNotes :: String -> Set Note -> Set String
+filteredNotes currentChord allowedNotes =
   if S.isEmpty allowedNotes then M.keys noteMap
+  else
+    S.fromFoldable $ L.filter (\k -> isFit k currentChord allowedNotes) $ L.fromFoldable $ M.keys noteMap
+
+filteredChords :: Set Note -> Set String
+filteredChords allowedNotes =
+  if S.isEmpty allowedNotes then M.keys chordMap
   else
     let
       allNotes = L.fromFoldable $ M.keys noteMap
-      allowedChords n = L.fromFoldable $ filteredChords n allowedNotes
-      noteChords :: String -> List ThisChord
-      noteChords n =
-        L.mapMaybe (\c -> M.lookup n allGenChords >>= M.lookup c) (allowedChords n)
-      hasChords :: String -> Boolean
-      hasChords n = (not L.null) (noteChords n)
+      theseNotes c = L.fromFoldable $ filteredNotes c allowedNotes
+      chordNotes :: String -> List ThisChord
+      chordNotes c =
+        L.mapMaybe (\n -> M.lookup c allGenChords >>= M.lookup n) (theseNotes c)
+      hasNotes :: String -> Boolean
+      hasNotes n = (not L.null) (chordNotes n)
     in
-     S.fromFoldable $ L.filter hasChords $ L.fromFoldable $ M.keys noteMap
+     S.fromFoldable $ L.filter hasNotes $ L.fromFoldable $ M.keys chordMap
 
 tuningRefName :: String
 tuningRefName = "Tuning"
@@ -147,8 +147,8 @@ render state =
       HH.div [ HP.class_ $ HH.ClassName "pure-u-1 pure-u-sm-1 pure-u-md-1-2 pure-u-lg-1-3" ]
       [ HH.form [ HP.class_ $ HH.ClassName "pure-form" ] $
         [ mkSelect tuningRefName guitarMap (M.keys guitarMap) state.slot ChangeGuitar
-        , mkSelect noteRefName noteMap (filteredIntervals state.selectedNotes) state.currentNote ChangeNote
-        , mkSelect chordRefName chordMap (filteredChords state.currentNote state.selectedNotes) state.currentChord ChangeChord
+        , mkSelect chordRefName chordMap (filteredChords state.selectedNotes) state.currentChord ChangeChord
+        , mkSelect noteRefName noteMap (filteredNotes state.currentChord state.selectedNotes) state.currentNote ChangeNote
         , mkButton ((if state.showColor then "Hide" else "Show") <> " Interval Colors") "plain" ToggleShowColor
         , mkButton "Clear Selected Frets" "warning" ClearSelected
         , mkButton "Clear All" "error" ClearAll
@@ -246,21 +246,21 @@ noteMap = T.taggedToMap N.allNotes
 allGenChords :: Map String (Map String ThisChord)
 allGenChords =
    let
-     forNote :: T.Tagged Note -> Tuple String (Map String ThisChord)
-     forNote note =
-       let
-         chords :: List (T.Tagged Chord)
-         chords = L.fromFoldable C.allChords
-       in
-        Tuple (T.getName note) (M.fromFoldable $ (\c -> Tuple (T.getName c) $ C.generateChord (T.getValue c)(T.getValue note)) <$> chords)
-
-     mapping :: List (Tuple String (Map String ThisChord))
-     mapping =
+     forChord :: T.Tagged Chord -> Tuple String (Map String ThisChord)
+     forChord chord =
        let
          notes :: List (T.Tagged Note)
          notes = L.fromFoldable N.allNotes
        in
-        forNote <$> notes
+        Tuple (T.getName chord) (M.fromFoldable $ (\n -> Tuple (T.getName n) $ C.generateChord (T.getValue chord)(T.getValue n)) <$> notes)
+
+     mapping :: List (Tuple String (Map String ThisChord))
+     mapping =
+       let
+         chords :: List (T.Tagged Chord)
+         chords = L.fromFoldable C.allChords
+       in
+        forChord <$> chords
    in
     M.fromFoldable mapping
 
