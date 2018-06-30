@@ -10,7 +10,8 @@
     "purescript-prelude": "^4.0.1",
     "purescript-console": "^4.1.0",
     "purescript-effect": "^2.0.0",
-    "purescript-colors": "^5.0.0"
+    "purescript-colors": "^5.0.0",
+    "js-cookie": "^2.2.0"
   },
   "devDependencies": {
     "purescript-psci-support": "^4.0.0",

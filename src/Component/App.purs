@@ -5,11 +5,13 @@ import Prelude
 import Chord (Chord, IntervalledNote, ThisChord)
 import Chord as C
 import Chord as I
-import Component.Constants (pushedFretRadius)
+import Component.Constants (guitarCookie, pushedFretRadius)
+import Component.Cookie (setCookie)
 import Component.FontAwesome (icon)
 import Component.FretColor (fretColor)
 import Component.Guitar as CG
 import Component.SVG as SVG
+import Control.Alt ((<|>))
 import Data.Array ((!!), (:))
 import Data.Array as A
 import Data.List (List)
@@ -48,9 +50,14 @@ defaultOptionValue = ""
 emptyFilter :: Set Note
 emptyFilter = S.empty
 
-initialState :: State
-initialState =
-  let mguitar = G.allGuitars !! 0
+initialState :: Maybe String -> State
+initialState cookieGuitar =
+  let
+    mcookie = do
+      name <- cookieGuitar
+      guitar <- M.lookup name guitarMap
+      pure $ T.Tagged name guitar
+    mguitar = mcookie <|> G.allGuitars !! 0
   in
    { currentGuitar: maybe G.standardGuitar T.getValue mguitar
    , currentChord: defaultOptionValue
@@ -87,10 +94,10 @@ data Slot = Slot String
 derive instance eqSlot :: Eq Slot
 derive instance ordSlot :: Ord Slot
 
-component :: H.Component HH.HTML Query Unit Void Aff
+component :: H.Component HH.HTML Query (Maybe String) Void Aff
 component =
   H.parentComponent
-  { initialState: const initialState
+  { initialState: initialState
   , render
   , eval
   , receiver: const Nothing
@@ -294,12 +301,13 @@ allGenChords =
    in
     M.fromFoldable mapping
 
-eval :: forall m. Query ~> H.ParentDSL State Query CG.Query Slot Void m
+eval :: Query ~> H.ParentDSL State Query CG.Query Slot Void Aff
 eval (ChangeGuitar name next) = do
   let mguitar = M.lookup name guitarMap
   case M.lookup name guitarMap of
     Nothing -> pure next
     Just guitar -> do
+      _ <- H.liftEffect $ setCookie guitarCookie name
       H.modify_ (_ { currentGuitar = guitar
                    , slot = name
                    , selectedNotes = S.empty :: Set Note

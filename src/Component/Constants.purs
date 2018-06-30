@@ -29,3 +29,6 @@ stringLength frets = lineHeight frets
 
 bodyRef :: H.RefLabel
 bodyRef = H.RefLabel "MainBody"
+
+guitarCookie :: String
+guitarCookie = "guitar"
