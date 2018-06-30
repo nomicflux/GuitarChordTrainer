@@ -108,8 +108,8 @@ render state =
     renderedOctaveFrets = renderOctaveFret numStrings `A.concatMap` octaveFrets
     renderedStrings = A.mapWithIndex (renderString state.numFrets numStrings) state.guitar.strings
   in
-   HH.div [ HP.ref containerRef
-          , HP.class_ $ HH.ClassName "guitar"
+   HH.div [ HP.class_ $ HH.ClassName "guitar"
+          , HP.ref containerRef
           ]
    [ SVG.svg [ SVG.height height
              , SVG.width width
@@ -130,7 +130,7 @@ eval (ShowColor showColor reply) = do
   _ <- passAlong (GS.ShowColor showColor)
   pure $ reply unit
 eval (ClickFret event next) =
-  H.getHTMLElementRef containerRef >>= case _ of
+  H.getRef containerRef >>= case _ of
     Nothing -> pure next
     Just el -> do
       offset <- H.liftEffect (getOffset el)

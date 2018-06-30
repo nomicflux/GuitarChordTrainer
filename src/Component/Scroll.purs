@@ -1,7 +1,7 @@
 module Component.Scroll where
 
 import Effect (Effect)
-import Web.HTML.HTMLElement (HTMLElement)
+import Web.DOM.Element (Element)
 
 type Offset = { top :: Number
               , left :: Number
@@ -11,4 +11,4 @@ foreign import getScrollTop :: Effect Number
 
 foreign import getScrollLeft :: Effect Number
 
-foreign import getOffset :: HTMLElement -> Effect Offset
+foreign import getOffset :: Element -> Effect Offset
