@@ -4,15 +4,15 @@ Link here: [https://nomicflux.github.io/GuitarChordTrainer]
 Lets the user find chords over the fretboard of guitars or other fretted instruments in any tuning, and colors the notes
 by interval.
 
-![Screenshot](img/screenshot.png)
+![Screenshot](img/7String.png)
 
 ### Usage
 
 * Select tuning / instrument, base note, & chord  to show the positions of the notes in the chord.
 * Interval colors are turned on by default.  Click "Hide Interval Colors" to just show Red for the base note and Black
   for others.
-* Click on the interval names in the sidebar to hide / show that interval on the fretboard.
-* Click on the fretboard to filter available chords to only those which include the given notes.
+* Click on the interval names in the sidebar to hide / show that interval on the fretboard. ![SelectedIntervals](img/SelectedIntervals.png)
+* Click on the fretboard to filter available chords to only those which include the given notes. ![SelectedFrets](img/SelectedFrets.png)
 
 ### To-Do
 
