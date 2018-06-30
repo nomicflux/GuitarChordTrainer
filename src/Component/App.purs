@@ -6,6 +6,7 @@ import Chord (Chord, IntervalledNote, ThisChord)
 import Chord as C
 import Chord as I
 import Component.Constants (pushedFretRadius)
+import Component.FontAwesome (icon)
 import Component.FretColor (fretColor)
 import Component.Guitar as CG
 import Component.SVG as SVG
@@ -38,6 +39,7 @@ type State = { currentGuitar :: Guitar
              , showColor :: Boolean
              , filteredIntervals :: Set Note
              , selectedNotes :: Set Note
+             , showSidebar :: Boolean
              }
 
 defaultOptionValue :: String
@@ -57,6 +59,7 @@ initialState =
    , showColor: true
    , filteredIntervals: emptyFilter
    , selectedNotes: emptyFilter
+   , showSidebar: false
    }
 
 getNote :: State -> Maybe Note
@@ -76,6 +79,7 @@ data Query a = ChangeGuitar String a
              | ChangeChord String a
              | ChangeNote String a
              | ToggleShowColor a
+             | ToggleSidebar a
              | ToggleInterval Note a
              | ClearSelected a
              | ClearAll a
@@ -138,21 +142,35 @@ render :: State -> H.ParentHTML Query CG.Query Slot Aff
 render state =
   HH.div [ HP.class_ $ HH.ClassName "pure-g" ]
   [ renderSidebar
-  ,  HH.div [ HP.class_ $ HH.ClassName "pure-u-1 pure-u-md-1-2 pure-u-lg-2-3" ]
+  ,  HH.div [ HP.class_ $ HH.ClassName "pure-u-1 pure-u-md-1-2 pure-u-lg-2-3 guitar-container" ]
      [ HH.slot (Slot state.slot) CG.component state.currentGuitar $ HE.input HandleGuitar ]
   ]
   where
-    renderSidebar :: H.ParentHTML Query CG.Query Slot Aff
-    renderSidebar =
-      HH.div [ HP.class_ $ HH.ClassName "pure-u-1 pure-u-sm-1 pure-u-md-1-2 pure-u-lg-1-3 sidebar" ]
+    renderSidebarToggle :: H.ParentHTML Query CG.Query Slot Aff
+    renderSidebarToggle =
+      HH.div [ HE.onClick $ HE.input_ ToggleSidebar
+             , HP.class_ $ HH.ClassName ("phone-only " <> if state.showSidebar then "sidebar-shown" else "sidebar-hidden")
+             ]
+      [ icon "ellipsis-h" ]
+
+    renderSidebarContent :: H.ParentHTML Query CG.Query Slot Aff
+    renderSidebarContent =
+      HH.div [ HP.class_ $ HH.ClassName ("sidebar-content " <> if state.showSidebar then "sidebar-shown" else "sidebar-hidden") ]
       [ HH.form [ HP.class_ $ HH.ClassName "pure-form" ] $
         [ mkSelect tuningRefName guitarMap (M.keys guitarMap) state.slot ChangeGuitar
         , mkSelect chordRefName chordMap (filteredChords state.selectedNotes) state.currentChord ChangeChord
         , mkSelect noteRefName noteMap (filteredNotes state.currentChord state.selectedNotes) state.currentNote ChangeNote
-        , mkButton ((if state.showColor then "Hide" else "Show") <> " Interval Colors") "plain" ToggleShowColor
-        , mkButton "Clear Selected Frets" "warning" ClearSelected
-        , mkButton "Clear All" "error" ClearAll
+        , mkButton ((if state.showColor then "Hide" else "Show") <> " Interval Colors") (if state.showColor then "toggle-on" else "toggle-off") "plain" ToggleShowColor
+        , mkButton "Clear Selected Frets" "eraser" "warning" ClearSelected
+        , mkButton "Clear All" "undo" "error" ClearAll
         ] <> maybe [] (A.singleton <<< renderIntervalChart <<< C.chordToIntervals) (getChord state)
+      ]
+
+    renderSidebar :: H.ParentHTML Query CG.Query Slot Aff
+    renderSidebar =
+      HH.div [ HP.class_ $ HH.ClassName ("pure-u-1 pure-u-sm-1 pure-u-md-1-2 pure-u-lg-1-3 sidebar " <> if state.showSidebar then "sidebar-shown" else "sidebar-hidden") ]
+      [ renderSidebarToggle
+      , renderSidebarContent
       ]
 
     renderInterval :: IntervalledNote ->
@@ -196,14 +214,16 @@ render state =
          (renderInterval <$> aIntervals)
        ]
 
-    mkButton :: String -> String -> (Unit -> Query Unit) -> H.ParentHTML Query CG.Query Slot Aff
-    mkButton text class_ query =
-      HH.div_
+    mkButton :: String -> String -> String -> (Unit -> Query Unit) -> H.ParentHTML Query CG.Query Slot Aff
+    mkButton screenText phoneIcon class_ query =
+      HH.div [ HP.class_ $ HH.ClassName "button-div" ]
       [ HH.button [ HP.class_ $ HH.ClassName ("pure-button color-button button-" <> class_)
                   , HE.onClick $ HE.input_ query
                   , HP.type_ $ HP.ButtonButton
                   ]
-        [ HH.text text ]
+        [ HH.span [ HP.class_ $ HH.ClassName "phone-only" ] [ icon phoneIcon ]
+        , HH.span [ HP.class_ $ HH.ClassName "screen-only" ] [ HH.text screenText ]
+        ]
       ]
 
     mkOption :: forall p i. Set String -> String -> HH.HTML p i
@@ -345,6 +365,10 @@ eval = case _ of
         _ <- H.query (Slot slot) $ H.request (CG.ShowChord chord)
         pure next
       Nothing -> pure next
+  ToggleSidebar next -> do
+    showSidebar <- H.gets (_.showSidebar)
+    H.modify_ (_ { showSidebar = not showSidebar })
+    pure next
   ClearSelected next -> do
     slot <- H.gets (_.slot)
     guitar <- H.gets (_.currentGuitar)
@@ -353,11 +377,11 @@ eval = case _ of
     pure next
   ClearAll next -> do
     slot <- H.gets (_.slot)
-    guitar <- H.gets (_.currentGuitar)
     _ <- H.query (Slot slot) $ H.request CG.ClearAll
-    H.put initialState
-    H.modify_ ( _ { currentGuitar = guitar
-                  , slot = slot
+    H.modify_ ( _ { currentChord = defaultOptionValue
+                  , currentNote = defaultOptionValue
+                  , selectedNotes = emptyFilter
+                  , filteredIntervals = emptyFilter
                   })
     pure next
   HandleGuitar (CG.Selected notes) next -> do

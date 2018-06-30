@@ -27,6 +27,11 @@ body {
     margin-left: 10px;
 }
 
+.fret-circle {
+    fill: rgba(0,0,0,0.3);
+    strok: rgba(0,0,0,0.3);
+}
+
 .button-success,
 .button-error,
 .button-warning,
@@ -88,16 +93,186 @@ body {
     padding: 10px;
 }
 
+.phone-only {
+    display: none;
+}
+
+@keyframes sidebar-extend {
+    from {
+        width: 10%;
+    }
+    to {
+        width: 90%;
+    }
+}
+
+@keyframes sidebar-extend-div {
+    from {
+        left: -200px;
+        opacity: 0;
+    }
+    to {
+        left: 0px;
+        opacity: 1;
+    }
+}
+
+@keyframes sidebar-extend-toggle {
+    from {
+        color: #FFF;
+        font-size: 2em;
+    }
+    to {
+        color: #CCC;
+        font-size: 1.3em;
+    }
+}
+
+@keyframes sidebar-retract {
+    from {
+        width: 90%;
+    }
+    to {
+        width: 10%;
+    }
+}
+
+@keyframes sidebar-retract-div {
+    from {
+        left: 0px;
+        opacity: 1;
+    }
+    to {
+        left: -200px;
+        opacity: 0;
+    }
+}
+
+@keyframes sidebar-retract-toggle {
+    to {
+        color: #FFF;
+        font-size: 2em;
+    }
+    from {
+        color: #CCC;
+        font-size: 1.3em;
+    }
+}
+
 @media only screen and (max-device-width: 812px) {
-    .gct-select-div {
-        font-size: 1.5em;
+    .gct-select-div label {
+        display: none;
+        font-size: 1.0em;
+    }
+
+    .gct-select-div select {
+        font-size: 1.0em;
+        color: #000;
     }
 
     .interval-key {
-        font-size: 1.5em;
+        font-size: 1.1em;
+        padding-top: 0.1em;
+        padding-bottom: 0.1em;
+        margin-top: 0.1em;
+        margin-bottom: 0.1em;
+    }
+
+    .button-div {
+        display: inline-block;
     }
 
     .color-button {
+        font-size: 1.0em;
+        text-decoration: none;
+    }
+
+    .sidebar {
+        background: rgba(0,0,0,0.8);
+        color: #FFF;
+        position: fixed;
+        top: 0;
+        left: 0;
+        z-index: 1;
+        height: 100%;
+    }
+
+    .sidebar-content {
+        height: 100%;
+    }
+
+    .sidebar-content div {
+        position: relative;
+    }
+
+    .sidebar.sidebar-hidden {
+        width: 10%;
+        animation-name: sidebar-retract;
+        animation-duration: 0.2s;
+        animation-timing-function: ease-in;
+    }
+
+    .sidebar-content.sidebar-hidden div {
+        left: -200px;
+        opacity: 0;
+        animation-name: sidebar-retract-div;
+        animation-duration: 0.2s;
+        animation-timing-function: ease-out;
+    }
+
+    .sidebar.sidebar-shown {
+        width: 90%;
+        animation-name: sidebar-extend;
+        animation-duration: 0.2s;
+        animation-timing-function: ease-out;
+    }
+
+    .sidebar-content.sidebar-shown div {
+        left: 0px;
+        opacity: 1;
+        animation-name: sidebar-extend-div;
+        animation-duration: 0.2s;
+        animation-timing-function: ease-out;
+    }
+
+    .guitar-container {
+        position: absolute;
+        width: 100%;
+        z-index: 0;
+        top: 0;
+        left: 0;
+    }
+
+    .guitar {
+        position: relative;
+        left: 25%;
+    }
+
+    .phone-only {
+        display: block;
+    }
+
+    .screen-only {
+        display: none;
+    }
+
+    .sidebar .phone-only {
+        border-bottom: 2px groove grey;
+        text-align: center;
+        font-weight: bold;
+    }
+
+    .sidebar .phone-only.sidebar-hidden {
+        font-size: 2em;
+        color: #FFF;
+        animation-name: sidebar-retract-toggle;
+        animation-duration: 0.2s;
+    }
+
+    .sidebar .phone-only.sidebar-shown {
         font-size: 1.3em;
+        color: #CCC;
+        animation-name: sidebar-extend-toggle;
+        animation-duration: 0.2s;
     }
 }

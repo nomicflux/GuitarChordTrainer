@@ -6,7 +6,7 @@ import Chord (ThisChord)
 import Component.Constants (fretHeight, fretMarkerRadius, fretWidth, halfFretHeight, lineHeight, stringLength)
 import Component.GuitarString as GS
 import Component.SVG as SVG
-import Component.Scroll (getScrollTop, getScrollLeft)
+import Component.Scroll (getOffset)
 import Data.Array as A
 import Data.Int (round, toNumber)
 import Data.Maybe (Maybe(..), fromMaybe)
@@ -20,7 +20,6 @@ import Halogen.HTML as HH
 import Halogen.HTML.Events as HE
 import Halogen.HTML.Properties as HP
 import Note (Note)
-import Web.HTML.HTMLElement as DOMHTML
 import Web.UIEvent.MouseEvent (MouseEvent)
 import Web.UIEvent.MouseEvent as ME
 
@@ -73,9 +72,8 @@ renderString numFrets numStrings id string =
 
 renderFretCircle :: forall p i. Int -> Int -> Int -> Int -> HH.HTML p i
 renderFretCircle numStrings fret radius offset =
-  SVG.circle [ SVG.fill "grey"
-             , SVG.stroke "grey"
-             , SVG.r radius
+  SVG.circle [ SVG.r radius
+             , SVG.class_ "fret-circle"
              , SVG.cx $ numStrings * fretWidth / 2 + offset
              , SVG.cy $ lineHeight fret - halfFretHeight
              ]
@@ -110,7 +108,9 @@ render state =
     renderedOctaveFrets = renderOctaveFret numStrings `A.concatMap` octaveFrets
     renderedStrings = A.mapWithIndex (renderString state.numFrets numStrings) state.guitar.strings
   in
-   HH.div [ HP.ref containerRef ]
+   HH.div [ HP.ref containerRef
+          , HP.class_ $ HH.ClassName "guitar"
+          ]
    [ SVG.svg [ SVG.height height
              , SVG.width width
              , SVG.viewBox $ A.intercalate " " [ "0 0"
@@ -144,17 +144,10 @@ eval = case _ of
     H.getHTMLElementRef containerRef >>= case _ of
       Nothing -> pure unit
       Just el -> do
-        scrollTop <- H.liftEffect getScrollTop
-        scrollLeft <- H.liftEffect getScrollLeft
-        offsetLeft <- H.liftEffect do
-          rect <- DOMHTML.getBoundingClientRect el
-          pure $ rect.left
-        offsetTop <- H.liftEffect do
-          rect <- DOMHTML.getBoundingClientRect el
-          pure $ rect.top
+        offset <- H.liftEffect (getOffset el)
         let
-          x = (toNumber $ ME.pageX event) - offsetLeft - scrollLeft
-          y = (toNumber $ ME.pageY event) - offsetTop - scrollTop
+          x = (toNumber $ ME.clientX event) - offset.left
+          y = (toNumber $ ME.clientY event) - offset.top
           string = round $ x / (toNumber fretWidth) - 0.5
           fret = round $ y / (toNumber fretHeight) - 0.5
         _ <- H.query (Slot string) $ H.request (GS.ToggleFret fret)

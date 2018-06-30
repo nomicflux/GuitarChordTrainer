@@ -4,25 +4,25 @@ import Halogen as H
 import Prelude ((*), (+), (/))
 
 pushedFretRadius :: Int
-pushedFretRadius = 7
+pushedFretRadius = 8
 
 fretMarkerRadius :: Int
-fretMarkerRadius = 9
+fretMarkerRadius = 10
 
 fretWidth :: Int
-fretWidth = 40
+fretWidth = 30
 
 fretHeight :: Int
-fretHeight = fretWidth
+fretHeight = 3 * fretWidth / 2
 
 halfFretWidth :: Int
 halfFretWidth = fretWidth / 2
 
 halfFretHeight :: Int
-halfFretHeight = halfFretWidth
+halfFretHeight = fretHeight / 2
 
 lineHeight :: Int -> Int
-lineHeight fret = (fret + 1) * fretWidth
+lineHeight fret = (fret + 1) * fretHeight
 
 stringLength :: Int -> Int
 stringLength frets = lineHeight frets
