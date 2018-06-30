@@ -149,7 +149,7 @@ render state =
     renderSidebarToggle :: H.ParentHTML Query CG.Query Slot Aff
     renderSidebarToggle =
       HH.div [ HE.onClick $ HE.input_ ToggleSidebar
-             , HP.class_ $ HH.ClassName ("phone-only " <> if state.showSidebar then "sidebar-shown" else "sidebar-hidden")
+             , HP.class_ $ HH.ClassName ("sidebar-toggle phone-only " <> if state.showSidebar then "sidebar-shown" else "sidebar-hidden")
              ]
       [ icon "ellipsis-h" ]
 
@@ -233,8 +233,8 @@ render state =
                   , HE.onClick $ HE.input_ query
                   , HP.type_ $ HP.ButtonButton
                   ]
-        [ HH.span [ HP.class_ $ HH.ClassName "phone-only" ] [ icon phoneIcon ]
-        , HH.span [ HP.class_ $ HH.ClassName "screen-only" ] [ HH.text screenText ]
+        [ HH.span [ HP.class_ $ HH.ClassName "button-icon" ] [ icon phoneIcon ]
+        , HH.span [ HP.class_ $ HH.ClassName "screen-only" ] [ HH.text $ " " <> screenText ]
         ]
       ]
 

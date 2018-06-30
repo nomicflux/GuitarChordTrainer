@@ -277,7 +277,7 @@ body {
         display: none;
     }
 
-    .sidebar .phone-only {
+    .sidebar .sidebar-toggle.phone-only {
         border-bottom: 2px groove grey;
         text-align: center;
         font-weight: bold;
