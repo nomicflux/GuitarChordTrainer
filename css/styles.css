@@ -184,7 +184,7 @@ body {
 
     .color-button {
         font-size: 1.0em;
-        text-decoration: none;
+        text-decoration-line: none;
     }
 
     .sidebar {
@@ -199,50 +199,61 @@ body {
 
     .sidebar-content {
         height: 100%;
+        text-align: center;
     }
 
     .sidebar-content div {
         position: relative;
     }
 
+    .sidebar-content .button-div {
+        margin: auto;
+    }
+
     .sidebar.sidebar-hidden {
         width: 10%;
         animation-name: sidebar-retract;
-        animation-duration: 0.2s;
+        animation-duration: 0.1s;
+        animation-timing-function: ease-in-out;
     }
 
     .sidebar-content.sidebar-hidden div {
         left: -200px;
         opacity: 0;
         animation-name: sidebar-retract-div;
-        animation-duration: 0.2s;
+        animation-duration: 0.1s;
+        animation-timing-function: ease-in-out;
     }
 
     .sidebar .phone-only.sidebar-hidden {
-        font-size: 2em;
+        font-size: 1.8em;
         color: #FFF;
         animation-name: sidebar-retract-toggle;
-        animation-duration: 0.2s;
+        animation-duration: 0.1s;
+        animation-timing-function: ease-in-out;
     }
 
     .sidebar.sidebar-shown {
         width: 90%;
         animation-name: sidebar-extend;
-        animation-duration: 0.2s;
+        animation-duration: 0.1s;
+        animation-timing-function: ease-in-out;
     }
 
     .sidebar-content.sidebar-shown div {
         left: 0px;
         opacity: 1;
         animation-name: sidebar-extend-div;
-        animation-duration: 0.2s;
+        animation-duration: 0.1s;
+        animation-timing-function: ease-in-out;
     }
 
     .sidebar .phone-only.sidebar-shown {
         font-size: 1.3em;
         color: #CCC;
         animation-name: sidebar-extend-toggle;
-        animation-duration: 0.2s;
+        animation-duration: 0.ks;
+        animation-timing-function: ease-in-out;
     }
 
     .guitar-container {

@@ -153,16 +153,28 @@ render state =
              ]
       [ icon "ellipsis-h" ]
 
+    renderSelects :: H.ParentHTML Query CG.Query Slot Aff
+    renderSelects =
+      HH.div [ HP.class_ $ HH.ClassName "select-div" ]
+      [ mkSelect tuningRefName guitarMap (M.keys guitarMap) state.slot ChangeGuitar
+      , mkSelect chordRefName chordMap (filteredChords state.selectedNotes) state.currentChord ChangeChord
+      , mkSelect noteRefName noteMap (filteredNotes state.currentChord state.selectedNotes) state.currentNote ChangeNote
+      ]
+
+    renderButtons :: H.ParentHTML Query CG.Query Slot Aff
+    renderButtons =
+      HH.div [ HP.class_ $ HH.ClassName "button-div" ]
+      [ mkButton ((if state.showColor then "Hide" else "Show") <> " Interval Colors") (if state.showColor then "toggle-on" else "toggle-off") "plain" ToggleShowColor
+      , mkButton "Clear Selected Frets" "eraser" "warning" ClearSelected
+      , mkButton "Clear All" "undo" "error" ClearAll
+      ]
+
     renderSidebarContent :: H.ParentHTML Query CG.Query Slot Aff
     renderSidebarContent =
       HH.div [ HP.class_ $ HH.ClassName ("sidebar-content " <> if state.showSidebar then "sidebar-shown" else "sidebar-hidden") ]
       [ HH.form [ HP.class_ $ HH.ClassName "pure-form" ] $
-        [ mkSelect tuningRefName guitarMap (M.keys guitarMap) state.slot ChangeGuitar
-        , mkSelect chordRefName chordMap (filteredChords state.selectedNotes) state.currentChord ChangeChord
-        , mkSelect noteRefName noteMap (filteredNotes state.currentChord state.selectedNotes) state.currentNote ChangeNote
-        , mkButton ((if state.showColor then "Hide" else "Show") <> " Interval Colors") (if state.showColor then "toggle-on" else "toggle-off") "plain" ToggleShowColor
-        , mkButton "Clear Selected Frets" "eraser" "warning" ClearSelected
-        , mkButton "Clear All" "undo" "error" ClearAll
+        [ renderSelects
+        , renderButtons
         ] <> maybe [] (A.singleton <<< renderIntervalChart <<< C.chordToIntervals) (getChord state)
       ]
 

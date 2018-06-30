@@ -33,7 +33,6 @@ data Query a = ShowChord ThisChord (Unit -> a)
              | HandleString Int GuitarString a
 
 data Slot = Slot Int
-
 derive instance eqSlot :: Eq Slot
 derive instance ordSlot :: Ord Slot
 
