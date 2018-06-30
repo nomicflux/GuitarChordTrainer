@@ -23,6 +23,10 @@ body {
 .string {
 }
 
+.sidebar .color-button {
+    margin-left: 10px;
+}
+
 .button-success,
 .button-error,
 .button-warning,
@@ -56,10 +60,15 @@ body {
     margin-top: 10px;
 }
 
+.interval-key {
+    padding-left: 10px;
+    padding-right: 10px;
+}
+
 .interval-key.restricted-height {
     height: 1.3em;
-    padding-left: 5px;
     padding-top: 10px;
+    padding-bottom: 10px;
 }
 
 .interval-key:hover {

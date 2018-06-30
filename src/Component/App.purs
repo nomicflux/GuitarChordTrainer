@@ -144,7 +144,7 @@ render state =
   where
     renderSidebar :: H.ParentHTML Query CG.Query Slot Aff
     renderSidebar =
-      HH.div [ HP.class_ $ HH.ClassName "pure-u-1 pure-u-sm-1 pure-u-md-1-2 pure-u-lg-1-3" ]
+      HH.div [ HP.class_ $ HH.ClassName "pure-u-1 pure-u-sm-1 pure-u-md-1-2 pure-u-lg-1-3 sidebar" ]
       [ HH.form [ HP.class_ $ HH.ClassName "pure-form" ] $
         [ mkSelect tuningRefName guitarMap (M.keys guitarMap) state.slot ChangeGuitar
         , mkSelect chordRefName chordMap (filteredChords state.selectedNotes) state.currentChord ChangeChord

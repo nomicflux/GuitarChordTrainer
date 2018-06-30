@@ -11978,7 +11978,7 @@ var PS = {};
               };
           };
       };
-      var renderSidebar = Halogen_HTML_Elements.div([ Halogen_HTML_Properties.class_("pure-u-1 pure-u-sm-1 pure-u-md-1-2 pure-u-lg-1-3") ])([ Halogen_HTML_Elements.form([ Halogen_HTML_Properties.class_("pure-form") ])(Data_Semigroup.append(Data_Semigroup.semigroupArray)([ mkSelect(tuningRefName)(guitarMap)(Data_Map.keys(guitarMap))(state.slot)(ChangeGuitar.create), mkSelect(chordRefName)(chordMap)(filteredChords(state.selectedNotes))(state.currentChord)(ChangeChord.create), mkSelect(noteRefName)(noteMap)(filteredNotes(state.currentChord)(state.selectedNotes))(state.currentNote)(ChangeNote.create), mkButton((function () {
+      var renderSidebar = Halogen_HTML_Elements.div([ Halogen_HTML_Properties.class_("pure-u-1 pure-u-sm-1 pure-u-md-1-2 pure-u-lg-1-3 sidebar") ])([ Halogen_HTML_Elements.form([ Halogen_HTML_Properties.class_("pure-form") ])(Data_Semigroup.append(Data_Semigroup.semigroupArray)([ mkSelect(tuningRefName)(guitarMap)(Data_Map.keys(guitarMap))(state.slot)(ChangeGuitar.create), mkSelect(chordRefName)(chordMap)(filteredChords(state.selectedNotes))(state.currentChord)(ChangeChord.create), mkSelect(noteRefName)(noteMap)(filteredNotes(state.currentChord)(state.selectedNotes))(state.currentNote)(ChangeNote.create), mkButton((function () {
           if (state.showColor) {
               return "Hide";
           };
