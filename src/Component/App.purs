@@ -66,10 +66,8 @@ getNote :: State -> Maybe Note
 getNote state = M.lookup state.currentNote noteMap
 
 getChord :: State -> Maybe ThisChord
-getChord state = do
-  chord <- M.lookup state.currentChord chordMap
-  note <- M.lookup state.currentNote noteMap
-  pure $ C.generateChord chord note
+getChord state =
+  M.lookup state.currentChord allGenChords >>= M.lookup state.currentNote
 
 getFilteredChord :: State -> Maybe ThisChord
 getFilteredChord state =
@@ -256,7 +254,7 @@ render state =
         defaultOption = mkOption S.empty defaultOptionValue
       in
        HH.div [ HP.class_ $ HH.ClassName "gct-select-div"
-              , HP.ref $ H.RefLabel label
+              -- , HP.ref $ H.RefLabel label
               ]
        [ HH.label [HP.for label] [ HH.text $ label <> ": " ]
        , HH.select ([ HP.name label
@@ -297,105 +295,102 @@ allGenChords =
     M.fromFoldable mapping
 
 eval :: forall m. Query ~> H.ParentDSL State Query CG.Query Slot Void m
-eval = case _ of
-  ChangeGuitar name next -> do
-    let mguitar = M.lookup name guitarMap
-    case M.lookup name guitarMap of
-      Nothing -> pure next
-      Just guitar -> do
-        H.modify_ (_ { currentGuitar = guitar
-                     , slot = name
-                     , selectedNotes = S.empty :: Set Note
-                     })
-        _ <- H.query (Slot name) $ H.request CG.ClearAll
-        thisChord <- H.gets getFilteredChord
-        case thisChord of
-          Nothing -> pure next
-          Just chord ->  do
-            _ <- H.query (Slot name) $ H.request (CG.ShowChord chord)
-            showColor <- H.gets (_.showColor)
-            _ <- H.query (Slot name) $ H.request (CG.ShowColor showColor)
-            pure next
-  ChangeChord name next -> do
-    case M.lookup name chordMap of
-      Nothing -> do
-        H.modify_ (_ { currentChord = defaultOptionValue
-                     , filteredIntervals = emptyFilter
-                     })
-        pure next
-      Just newChord -> do
-        H.modify_ (_ { currentChord = name
-                     , filteredIntervals = emptyFilter
-                     })
-        thisChord <- H.gets getChord
-        case thisChord of
-          Nothing -> pure next
-          Just chord -> do
-            slot <- H.gets (_.slot)
-            _ <- H.query (Slot slot) $ H.request (CG.ShowChord chord)
-            pure next
-  ChangeNote name next -> do
-    case M.lookup name noteMap of
-      Nothing -> do
-        H.modify_ (_ { currentNote = defaultOptionValue
-                     , filteredIntervals = emptyFilter
-                     })
-        pure next
-      Just newNote -> do
-        oldNote <- H.gets getNote
-        filteredIntervals <- H.gets (_.filteredIntervals)
-        let change = (flip N.noteDistance) newNote <$> oldNote
-            newFilter =
-              maybe emptyFilter (\d -> S.map ((flip N.incNoteBy) d) filteredIntervals) change
-        H.modify_ (_ { currentNote = name
-                     , filteredIntervals = newFilter
-                     })
-        thisChord <- H.gets getFilteredChord
-        case thisChord of
-          Nothing -> pure next
-          Just chord -> do
-            slot <- H.gets (_.slot)
-            _ <- H.query (Slot slot) $ H.request (CG.ShowChord chord)
-            pure next
-  ToggleShowColor next -> do
-    slot <- H.gets (_.slot)
-    showColor <- H.gets (_.showColor)
-    let nowShow = not showColor
-    H.modify_ (_ { showColor = nowShow })
-    _ <- H.query (Slot slot) $ H.request (CG.ShowColor nowShow)
-    pure next
-  ToggleInterval interval next -> do
-    filteredIntervals <- H.gets (_.filteredIntervals)
-    let newFilter = if S.member interval filteredIntervals
-                    then S.delete interval filteredIntervals
-                    else S.insert interval filteredIntervals
-    H.modify_ (_ { filteredIntervals = newFilter })
-    thisChord <- H.gets getFilteredChord
-    case thisChord of
-      Just chord -> do
-        slot <- H.gets (_.slot)
-        _ <- H.query (Slot slot) $ H.request (CG.ShowChord chord)
-        pure next
-      Nothing -> pure next
-  ToggleSidebar next -> do
-    showSidebar <- H.gets (_.showSidebar)
-    H.modify_ (_ { showSidebar = not showSidebar })
-    pure next
-  ClearSelected next -> do
-    slot <- H.gets (_.slot)
-    guitar <- H.gets (_.currentGuitar)
-    _ <- H.query (Slot slot) $ H.request CG.ClearToggled
-    H.modify_ ( _ { selectedNotes = S.empty :: Set Note })
-    pure next
-  ClearAll next -> do
-    slot <- H.gets (_.slot)
-    _ <- H.query (Slot slot) $ H.request CG.ClearAll
-    H.modify_ ( _ { currentChord = defaultOptionValue
-                  , currentNote = defaultOptionValue
-                  , selectedNotes = emptyFilter
-                  , filteredIntervals = emptyFilter
-                  })
-    pure next
-  HandleGuitar (CG.Selected notes) next -> do
-    H.modify_ (_ { selectedNotes = notes })
-    pure next
+eval (ChangeGuitar name next) = do
+  let mguitar = M.lookup name guitarMap
+  case M.lookup name guitarMap of
+    Nothing -> pure next
+    Just guitar -> do
+      H.modify_ (_ { currentGuitar = guitar
+                   , slot = name
+                   , selectedNotes = S.empty :: Set Note
+                   })
+      _ <- H.query (Slot name) $ H.request CG.ClearAll
+      thisChord <- H.gets getFilteredChord
+      case thisChord of
+        Nothing -> pure next
+        Just chord ->  do
+          _ <- H.query (Slot name) $ H.request (CG.ShowChord chord)
+          showColor <- H.gets (_.showColor)
+          _ <- H.query (Slot name) $ H.request (CG.ShowColor showColor)
+          pure next
+eval (ChangeChord name next) = do
+  case M.lookup name chordMap of
+    Nothing -> do
+      H.modify_ (_ { currentChord = defaultOptionValue
+                   , filteredIntervals = emptyFilter
+                   })
+      pure next
+    Just newChord -> do
+      H.modify_ (_ { currentChord = name
+                   , filteredIntervals = emptyFilter
+                   })
+      thisChord <- H.gets getChord
+      case thisChord of
+        Nothing -> pure next
+        Just chord -> do
+          slot <- H.gets (_.slot)
+          _ <- H.query (Slot slot) $ H.request (CG.ShowChord chord)
+          pure next
+eval (ChangeNote name next) = do
+  case M.lookup name noteMap of
+    Nothing -> do
+      H.modify_ (_ { currentNote = defaultOptionValue
+                   , filteredIntervals = emptyFilter
+                   })
+      pure next
+    Just newNote -> do
+      oldNote <- H.gets getNote
+      filteredIntervals <- H.gets (_.filteredIntervals)
+      let change = (flip N.noteDistance) newNote <$> oldNote
+          newFilter =
+            maybe emptyFilter (\d -> S.map ((flip N.incNoteBy) d) filteredIntervals) change
+      H.modify_ (_ { currentNote = name
+                   , filteredIntervals = newFilter
+                   })
+      thisChord <- H.gets getFilteredChord
+      case thisChord of
+        Nothing -> pure next
+        Just chord -> do
+          slot <- H.gets (_.slot)
+          _ <- H.query (Slot slot) $ H.request (CG.ShowChord chord)
+          pure next
+eval (ToggleShowColor next) = do
+  state <- H.get
+  let nowShow = not state.showColor
+  H.modify_ (_ { showColor = nowShow })
+  _ <- H.query (Slot state.slot) $ H.request (CG.ShowColor nowShow)
+  pure next
+eval (ToggleInterval interval next) = do
+  filteredIntervals <- H.gets (_.filteredIntervals)
+  let newFilter = if S.member interval filteredIntervals
+                  then S.delete interval filteredIntervals
+                  else S.insert interval filteredIntervals
+  H.modify_ (_ { filteredIntervals = newFilter })
+  thisChord <- H.gets getFilteredChord
+  case thisChord of
+    Just chord -> do
+      slot <- H.gets (_.slot)
+      _ <- H.query (Slot slot) $ H.request (CG.ShowChord chord)
+      pure next
+    Nothing -> pure next
+eval (ToggleSidebar next) = do
+  showSidebar <- H.gets (_.showSidebar)
+  H.modify_ (_ { showSidebar = not showSidebar })
+  pure next
+eval (ClearSelected next) = do
+  state <- H.get
+  _ <- H.query (Slot state.slot) $ H.request CG.ClearToggled
+  H.modify_ ( _ { selectedNotes = S.empty :: Set Note })
+  pure next
+eval (ClearAll next) = do
+  slot <- H.gets (_.slot)
+  _ <- H.query (Slot slot) $ H.request CG.ClearAll
+  H.modify_ ( _ { currentChord = defaultOptionValue
+                , currentNote = defaultOptionValue
+                , selectedNotes = emptyFilter
+                , filteredIntervals = emptyFilter
+                })
+  pure next
+eval (HandleGuitar (CG.Selected notes) next) = do
+  H.modify_ (_ { selectedNotes = notes })
+  pure next

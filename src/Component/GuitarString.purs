@@ -153,13 +153,12 @@ getNotePositions string root note =
 eval :: forall m. Query ~> H.ComponentDSL State Query Void m
 eval = case _ of
   ToggleFret fretPosition next -> do
-    frets <- H.gets (_.frets)
-    toggled <- H.gets (_.toggled)
+    state <- H.get
     let
-      present = S.member fretPosition toggled
+      present = S.member fretPosition state.toggled
       newToggled = if present
-                   then S.delete fretPosition toggled
-                   else S.insert fretPosition toggled
+                   then S.delete fretPosition state.toggled
+                   else S.insert fretPosition state.toggled
     H.modify_ (_ { toggled = newToggled })
     pure $ next unit
   PushChord chord next -> do
@@ -173,9 +172,8 @@ eval = case _ of
     H.modify_ (_ {showColor = showColor})
     pure $ next unit
   GetNotes reply -> do
-    toggled <- H.gets (_.toggled)
-    stringNote <- H.gets (_.string.baseNote)
-    let notes = S.map (\fret -> N.incNoteBy stringNote fret) toggled
+    state <- H.get
+    let notes = S.map (\fret -> N.incNoteBy state.string.baseNote fret) state.toggled
     pure $ reply notes
   ResetChord next -> do
     H.modify_ (_ { frets = S.empty :: Set FrettedNote })

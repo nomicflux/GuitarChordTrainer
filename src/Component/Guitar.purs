@@ -5,6 +5,7 @@ import Prelude
 import Chord (ThisChord)
 import Component.Constants (fretHeight, fretMarkerRadius, fretWidth, halfFretHeight, lineHeight, stringLength)
 import Component.GuitarString as GS
+import Component.Helpers (passAlong, getBack)
 import Component.SVG as SVG
 import Component.Scroll (getOffset)
 import Data.Array as A
@@ -120,67 +121,39 @@ render state =
              ] $ renderedKeyFrets <> renderedOctaveFrets <> renderedStrings
    ]
 
-getSlotIds :: State -> Array Int
-getSlotIds state =
-  let numStrings = A.length state.guitar.strings
-  in A.range 0 $ numStrings - 1
-
 eval :: Query ~> H.ParentDSL State Query GS.Query Slot Message Aff
-eval = case _ of
-  ShowChord chord next -> do
-    ids <- H.gets getSlotIds
-    let reset _ id = H.query (Slot id) $ H.request GS.ResetChord
-        pushNotes _ id = H.query (Slot id) $ H.request (GS.PushChord chord)
-    _ <- A.foldM reset Nothing ids
-    _ <- A.foldM pushNotes Nothing ids
-    pure $ next unit
-  ShowColor showColor reply -> do
-    ids <- H.gets getSlotIds
-    let toggleColor _ id = H.query (Slot id) $ H.request (GS.ShowColor showColor)
-    _ <- A.foldM toggleColor Nothing ids
-    pure $ reply unit
-  ClickFret event next -> do
-    H.getHTMLElementRef containerRef >>= case _ of
-      Nothing -> pure unit
-      Just el -> do
-        offset <- H.liftEffect (getOffset el)
-        let
-          x = (toNumber $ ME.clientX event) - offset.left
-          y = (toNumber $ ME.clientY event) - offset.top
-          string = round $ x / (toNumber fretWidth) - 0.5
-          fret = round $ y / (toNumber fretHeight) - 0.5
-        _ <- H.query (Slot string) $ H.request (GS.ToggleFret fret)
-        ids <- H.gets getSlotIds
-        let notes acc id = do
-              these <- H.query (Slot id) $ H.request GS.GetNotes
-              pure $ S.union acc (fromMaybe S.empty these)
-        allNotes <- A.foldM notes S.empty ids
-        H.raise (Selected allNotes)
-        pure unit
-    pure next
-  ClearChord next -> do
-    ids <- H.gets getSlotIds
-    let reset _ id = H.query (Slot id) $ H.request GS.ResetChord
-    _ <- A.foldM reset Nothing ids
-    pure $ next unit
-  ClearToggled next -> do
-    ids <- H.gets getSlotIds
-    let reset _ id = H.query (Slot id) $ H.request GS.ResetToggled
-    _ <- A.foldM reset Nothing ids
-    pure $ next unit
-  ClearAll next -> do
-    ids <- H.gets getSlotIds
-    let resetChord _ id = H.query (Slot id) $ H.request GS.ResetChord
-        resetToggled _ id = H.query (Slot id) $ H.request GS.ResetToggled
-    _ <- A.foldM resetChord Nothing ids
-    _ <- A.foldM resetToggled Nothing ids
-    pure $ next unit
-  GetNotes reply -> do
-    ids <- H.gets getSlotIds
-    let notes acc id = do
-          these <- H.query (Slot id) $ H.request GS.GetNotes
-          pure $ S.union acc (fromMaybe S.empty these)
-    allNotes <- A.foldM notes S.empty ids
-    pure $ reply allNotes
-  HandleString id string next -> do
-    pure next
+eval (ShowChord chord next) = do
+  _ <- passAlong GS.ResetChord
+  _ <- passAlong (GS.PushChord chord)
+  pure $ next unit
+eval (ShowColor showColor reply) = do
+  _ <- passAlong (GS.ShowColor showColor)
+  pure $ reply unit
+eval (ClickFret event next) =
+  H.getHTMLElementRef containerRef >>= case _ of
+    Nothing -> pure next
+    Just el -> do
+      offset <- H.liftEffect (getOffset el)
+      let
+        x = (toNumber $ ME.clientX event) - offset.left
+        y = (toNumber $ ME.clientY event) - offset.top
+        string = round $ x / (toNumber fretWidth) - 0.5
+        fret = round $ y / (toNumber fretHeight) - 0.5
+      _ <- H.query (Slot string) $ H.request (GS.ToggleFret fret)
+      allNotes <- getBack (\acc these -> S.union acc (fromMaybe S.empty these)) S.empty GS.GetNotes
+      H.raise (Selected allNotes)
+      pure next
+eval (ClearChord next) = do
+  _ <- passAlong GS.ResetChord
+  pure $ next unit
+eval (ClearToggled next) = do
+  _ <- passAlong GS.ResetToggled
+  pure $ next unit
+eval (ClearAll next) = do
+  _ <- passAlong GS.ResetChord
+  _ <- passAlong GS.ResetToggled
+  pure $ next unit
+eval (GetNotes reply) = do
+  allNotes <- getBack (\acc these -> S.union acc (fromMaybe S.empty these)) S.empty GS.GetNotes
+  pure $ reply allNotes
+eval (HandleString id string next) = pure next
