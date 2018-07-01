@@ -2,11 +2,11 @@ module Component.Guitar where
 
 import Prelude
 
-import Chord (ThisChord)
-import Component.Common.Constants (fretHeight, fretMarkerRadius, fretWidth, halfFretHeight, lineHeight, stringLength)
 import Component.Common.Communication (passAlong, getBack)
-import Component.Common.SVG as SVG
+import Component.Common.Constants (fretHeight, fretMarkerRadius, fretWidth, halfFretHeight, lineHeight, stringLength)
 import Component.Common.Offset (getOffset)
+import Component.Common.RootedInterval (RootedInterval)
+import Component.Common.SVG as SVG
 import Component.GuitarString as GS
 import Data.Array as A
 import Data.Int (round, toNumber)
@@ -24,10 +24,10 @@ import Note (Note)
 import Web.UIEvent.MouseEvent (MouseEvent)
 import Web.UIEvent.MouseEvent as ME
 
-data Query a = ShowChord ThisChord (Unit -> a)
+data Query a = ShowNotes RootedInterval (Unit -> a)
              | ShowColor Boolean (Unit -> a)
              | ClickFret MouseEvent a
-             | ClearChord (Unit -> a)
+             | ClearNotes (Unit -> a)
              | ClearToggled (Unit -> a)
              | ClearAll (Unit -> a)
              | GetNotes (Set Note -> a)
@@ -122,9 +122,9 @@ render state =
    ]
 
 eval :: Query ~> H.ParentDSL State Query GS.Query Slot Message Aff
-eval (ShowChord chord next) = do
-  _ <- passAlong GS.ResetChord
-  _ <- passAlong (GS.PushChord chord)
+eval (ShowNotes intervals next) = do
+  _ <- passAlong GS.ResetNotes
+  _ <- passAlong (GS.PushNotes intervals)
   pure $ next unit
 eval (ShowColor showColor reply) = do
   _ <- passAlong (GS.ShowColor showColor)
@@ -143,14 +143,14 @@ eval (ClickFret event next) =
       allNotes <- getBack (\acc these -> S.union acc (fromMaybe S.empty these)) S.empty GS.GetNotes
       H.raise (Selected allNotes)
       pure next
-eval (ClearChord next) = do
-  _ <- passAlong GS.ResetChord
+eval (ClearNotes next) = do
+  _ <- passAlong GS.ResetNotes
   pure $ next unit
 eval (ClearToggled next) = do
   _ <- passAlong GS.ResetToggled
   pure $ next unit
 eval (ClearAll next) = do
-  _ <- passAlong GS.ResetChord
+  _ <- passAlong GS.ResetNotes
   _ <- passAlong GS.ResetToggled
   pure $ next unit
 eval (GetNotes reply) = do

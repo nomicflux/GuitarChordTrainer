@@ -171,11 +171,18 @@ body {
     }
 
     .interval-key {
-        font-size: 1.1em;
         padding-top: 0.1em;
         padding-bottom: 0.1em;
         margin-top: 0.1em;
         margin-bottom: 0.1em;
+    }
+
+    .intervals-chart.on-scales {
+        font-size: 0.9em;
+    }
+
+    .intervals-chart.on-chords {
+        font-size: 1.1em;
     }
 
     .button-div {

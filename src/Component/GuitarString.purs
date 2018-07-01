@@ -2,9 +2,9 @@ module Component.GuitarString where
 
 import Prelude
 
-import Chord (ThisChord)
 import Component.Common.Constants (halfFretHeight, halfFretWidth, lineHeight, pushedFretRadius)
 import Component.Common.FretColor (fretColor)
+import Component.Common.RootedInterval (RootedInterval)
 import Component.Common.SVG as SVG
 import Data.Array ((:))
 import Data.Array as A
@@ -64,10 +64,10 @@ initialState input = { string: input.string
                      }
 
 data Query a = ToggleFret Int (Unit -> a)
-             | PushChord ThisChord (Unit -> a)
+             | PushNotes RootedInterval (Unit -> a)
              | ShowColor Boolean (Unit -> a)
              | GetNotes (Set Note -> a)
-             | ResetChord (Unit -> a)
+             | ResetNotes (Unit -> a)
              | ResetToggled (Unit -> a)
 
 component :: forall m. H.Component HH.HTML Query Input Void m
@@ -161,10 +161,10 @@ eval = case _ of
                    else S.insert fretPosition state.toggled
     H.modify_ (_ { toggled = newToggled })
     pure $ next unit
-  PushChord chord next -> do
+  PushNotes intervals next -> do
     state <- H.get
     let
-      newFrets = S.fromFoldable $ (getNotePositions state.string chord.rootNote) `L.concatMap` (L.fromFoldable chord.chord)
+      newFrets = S.fromFoldable $ (getNotePositions state.string intervals.rootNote) `L.concatMap` (L.fromFoldable intervals.notes)
       forState = S.union newFrets state.frets
     H.modify_ (_ { frets = forState })
     pure $ next unit
@@ -175,7 +175,7 @@ eval = case _ of
     state <- H.get
     let notes = S.map (\fret -> N.incNoteBy state.string.baseNote fret) state.toggled
     pure $ reply notes
-  ResetChord next -> do
+  ResetNotes next -> do
     H.modify_ (_ { frets = S.empty :: Set FrettedNote })
     pure $ next unit
   ResetToggled next -> do

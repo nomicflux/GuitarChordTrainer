@@ -2,13 +2,14 @@ module Component.App where
 
 import Prelude
 
-import Chord (Chord, IntervalledNote, ThisChord)
+import Chord (Chord)
 import Chord as C
-import Chord as I
-import Component.Common.Constants (guitarCookie, pushedFretRadius)
+import Component.Common.Constants (guitarCookie, pushedFretRadius, scaleChordCookie)
 import Component.Common.Cookie (setCookie)
 import Component.Common.FontAwesome (icon)
 import Component.Common.FretColor (fretColor)
+import Component.Common.RootedInterval (IntervalledNote, RootedInterval, filterNotes, fromChord, fromScale, toIntervals)
+import Component.Common.RootedInterval as RI
 import Component.Common.SVG as SVG
 import Component.Guitar as CG
 import Control.Alt ((<|>))
@@ -32,9 +33,15 @@ import Halogen.HTML.Properties as HP
 import Interval (intervalToName)
 import Note (Note)
 import Note as N
+import Scale (Scale)
+import Scale as Sc
 import Tagged as T
 
 data Using = Scales | Chords
+
+flipUsing :: Using -> Using
+flipUsing Scales = Chords
+flipUsing Chords = Scales
 
 type State = { currentGuitar :: String
              , currentChord :: String
@@ -62,6 +69,10 @@ scaleChordFromString "scale" = Just Scales
 scaleChordFromString "chord" = Just Chords
 scaleChordFromString _ = Nothing
 
+scaleChordToString :: Using -> String
+scaleChordToString Scales = "scale"
+scaleChordToString Chords = "chord"
+
 initialState :: Input -> State
 initialState input =
   let
@@ -75,26 +86,42 @@ initialState input =
    , filteredIntervals: emptyFilter
    , selectedNotes: emptyFilter
    , showSidebar: false
-   , scalesOrChords: fromMaybe Scales $ input.scalesOrChords >>= scaleChordFromString
+   , scalesOrChords: fromMaybe Chords $ input.scalesOrChords >>= scaleChordFromString
    }
 
 getNote :: State -> Maybe Note
 getNote state = M.lookup state.currentNote noteMap
 
-getChord :: State -> Maybe ThisChord
+getChord :: State -> Maybe RootedInterval
 getChord state =
   M.lookup state.currentChord allGenChords >>= M.lookup state.currentNote
 
-getFilteredChord :: State -> Maybe ThisChord
+getScale :: State -> Maybe RootedInterval
+getScale state =
+  M.lookup state.currentScale allGenScales >>= M.lookup state.currentNote
+
+getFilteredChord :: State -> Maybe RootedInterval
 getFilteredChord state =
-  (flip C.filterNotes) state.filteredIntervals <$> getChord state
+  (flip filterNotes) state.filteredIntervals <$> getChord state
+
+getFilteredScale :: State -> Maybe RootedInterval
+getFilteredScale state =
+  (flip filterNotes) state.filteredIntervals <$> getScale state
+
+getFiltered :: State -> Maybe RootedInterval
+getFiltered state =
+  case state.scalesOrChords of
+    Scales -> getFilteredScale state
+    Chords -> getFilteredChord state
 
 data Query a = ChangeGuitar String a
              | ChangeChord String a
+             | ChangeScale String a
              | ChangeNote String a
              | ToggleShowColor a
              | ToggleSidebar a
              | ToggleInterval Note a
+             | ToggleScalesChords a
              | ClearSelected a
              | ClearAll a
              | HandleGuitar CG.Message a
@@ -115,39 +142,55 @@ component =
 isFiltered :: State -> Note -> Boolean
 isFiltered state note = S.member note state.filteredIntervals
 
-isFit :: String -> String -> Set Note -> Boolean
-isFit note chord allowed =
+isFit :: Map String (Map String RootedInterval) ->
+         String -> String -> Set Note -> Boolean
+isFit intervalMap note interval allowed =
   let
-    thisChord = M.lookup chord allGenChords >>= M.lookup note
+    theseIntervals = M.lookup interval intervalMap >>= M.lookup note
   in
-   maybe false (\c -> S.intersection allowed c.chord == allowed) thisChord
+   maybe false (\c -> S.intersection allowed c.notes == allowed) theseIntervals
 
-filteredNotes :: String -> Set Note -> Set String
-filteredNotes currentChord allowedNotes =
+filteredNotes :: Map String (Map String RootedInterval) ->
+                 String -> Set Note -> Set String
+filteredNotes intervalMap currentIntervals allowedNotes =
   if S.isEmpty allowedNotes then M.keys noteMap
   else
-    S.fromFoldable $ L.filter (\k -> isFit k currentChord allowedNotes) $ L.fromFoldable $ M.keys noteMap
+    S.fromFoldable $ L.filter (\k -> isFit intervalMap k currentIntervals allowedNotes) $ L.fromFoldable $ M.keys noteMap
 
-filteredChords :: Set Note -> Set String
-filteredChords allowedNotes =
-  if S.isEmpty allowedNotes then M.keys chordMap
+filteredIntervals :: Map String (Map String RootedInterval) ->
+                     Set String ->
+                     Set Note ->
+                     Set String
+filteredIntervals intervalMap def allowedNotes =
+  if S.isEmpty allowedNotes then def
   else
     let
       allNotes = L.fromFoldable $ M.keys noteMap
-      theseNotes c = L.fromFoldable $ filteredNotes c allowedNotes
-      chordNotes :: String -> List ThisChord
-      chordNotes c =
-        L.mapMaybe (\n -> M.lookup c allGenChords >>= M.lookup n) (theseNotes c)
+      theseNotes :: String -> List String
+      theseNotes i = L.fromFoldable $ filteredNotes intervalMap i allowedNotes
+      intervalNotes i =
+        L.mapMaybe (\n -> M.lookup i intervalMap >>= M.lookup n) (theseNotes i)
       hasNotes :: String -> Boolean
-      hasNotes n = (not L.null) (chordNotes n)
+      hasNotes n = (not L.null) (intervalNotes n)
     in
-     S.fromFoldable $ L.filter hasNotes $ L.fromFoldable $ M.keys chordMap
+     S.fromFoldable $ L.filter hasNotes $ L.fromFoldable $ def
+
+filteredChords :: Set Note -> Set String
+filteredChords =
+  filteredIntervals allGenChords (M.keys chordMap)
+
+filteredScales :: Set Note -> Set String
+filteredScales =
+  filteredIntervals allGenScales (M.keys scaleMap)
 
 tuningRefName :: String
 tuningRefName = "Tuning"
 
 chordRefName :: String
 chordRefName = "Chord"
+
+scaleRefName :: String
+scaleRefName = "Scale"
 
 noteRefName :: String
 noteRefName = "Note"
@@ -174,28 +217,59 @@ render state =
 
     renderSelects :: H.ParentHTML Query CG.Query Slot Aff
     renderSelects =
-      HH.div [ HP.class_ $ HH.ClassName "select-div" ]
-      [ mkSelect tuningRefName guitarMap (M.keys guitarMap) state.currentGuitar ChangeGuitar
-      , mkSelect chordRefName chordMap (filteredChords state.selectedNotes) state.currentChord ChangeChord
-      , mkSelect noteRefName noteMap (filteredNotes state.currentChord state.selectedNotes) state.currentNote ChangeNote
-      ]
+      let noteGetter =
+            case state.scalesOrChords of
+              Scales -> allGenScales
+              Chords -> allGenChords
+          noteSource =
+            case state.scalesOrChords of
+              Scales -> state.currentScale
+              Chords -> state.currentChord
+      in
+       HH.div [ HP.class_ $ HH.ClassName "select-div" ]
+       [ mkSelect tuningRefName guitarMap (M.keys guitarMap) state.currentGuitar ChangeGuitar
+       , case state.scalesOrChords of
+         Scales ->
+           mkSelect scaleRefName scaleMap (filteredScales state.selectedNotes) state.currentScale ChangeScale
+         Chords ->
+           mkSelect chordRefName chordMap (filteredChords state.selectedNotes) state.currentChord ChangeChord
+       , mkSelect noteRefName noteMap (filteredNotes noteGetter noteSource state.selectedNotes) state.currentNote ChangeNote
+       ]
 
     renderButtons :: H.ParentHTML Query CG.Query Slot Aff
     renderButtons =
-      HH.div [ HP.class_ $ HH.ClassName "button-div" ]
-      [ mkButton ((if state.showColor then "Hide" else "Show") <> " Interval Colors") (if state.showColor then "toggle-on" else "toggle-off") "plain" ToggleShowColor
-      , mkButton "Clear Selected Frets" "eraser" "warning" ClearSelected
-      , mkButton "Clear All" "undo" "error" ClearAll
-      ]
+      let
+        colorText = if state.showColor then "Hide" else "Show"
+        colorIcon = if state.showColor then "toggle-on" else "toggle-off"
+        scaleChordText =
+          case state.scalesOrChords of
+            Scales -> "Chords"
+            Chords -> "Scales"
+        scaleChordIcon =
+          case state.scalesOrChords of
+            Scales -> "ruler-horizontal"
+            Chords -> "ruler-vertical"
+      in
+       HH.div [ HP.class_ $ HH.ClassName "button-div" ]
+       [ mkButton (colorText <> " Interval Colors") colorIcon "plain" ToggleShowColor
+       , mkButton ("Show " <> scaleChordText) scaleChordIcon "secondary" ToggleScalesChords
+       , mkButton "Clear Selected Frets" "eraser" "warning" ClearSelected
+       , mkButton "Clear All" "undo" "error" ClearAll
+       ]
 
     renderSidebarContent :: H.ParentHTML Query CG.Query Slot Aff
     renderSidebarContent =
-      HH.div [ HP.class_ $ HH.ClassName ("sidebar-content " <> if state.showSidebar then "sidebar-shown" else "sidebar-hidden") ]
-      [ HH.form [ HP.class_ $ HH.ClassName "pure-form" ] $
-        [ renderSelects
-        , renderButtons
-        ] <> maybe [] (A.singleton <<< renderIntervalChart <<< C.chordToIntervals) (getChord state)
-      ]
+      let intervals =
+            case state.scalesOrChords of
+              Scales -> getScale state
+              Chords -> getChord state
+      in
+       HH.div [ HP.class_ $ HH.ClassName ("sidebar-content " <> if state.showSidebar then "sidebar-shown" else "sidebar-hidden") ]
+       [ HH.form [ HP.class_ $ HH.ClassName "pure-form" ] $
+         [ renderSelects
+         , renderButtons
+         ] <> maybe [] (A.singleton <<< renderIntervalChart <<< toIntervals) intervals
+       ]
 
     renderSidebar :: H.ParentHTML Query CG.Query Slot Aff
     renderSidebar =
@@ -209,15 +283,15 @@ render state =
     renderInterval interval =
       let halfWidth = pushedFretRadius + 1
           halfHeight = pushedFretRadius + 1
-          class_ = if isFiltered state (I.getNote interval) then "filtered" else "unfiltered"
-          filterInterval x = state.showColor || (I.getInterval x) == 0
+          class_ = if isFiltered state (RI.getNote interval) then "filtered" else "unfiltered"
+          filterInterval x = state.showColor || (RI.getInterval x) == 0
           f i = if filterInterval i
-                then fretColor (I.getInterval i)
+                then fretColor (RI.getInterval i)
                 else "black"
       in
        HH.li
        [ HP.class_ $ HH.ClassName ("pure-menu-item restricted-height interval-key " <> class_)
-       , HE.onClick $ HE.input_ (ToggleInterval (I.getNote interval))
+       , HE.onClick $ HE.input_ (ToggleInterval (RI.getNote interval))
        ]
        [ SVG.svg [ SVG.width $ halfWidth * 2
                  , SVG.height $ halfHeight * 2
@@ -232,16 +306,20 @@ render state =
                                 , SVG.stroke "black"
                                 ]
                    ]
-       , HH.text $ " = " <> intervalToName (I.getInterval interval)
+       , HH.text $ " = " <> intervalToName (RI.getInterval interval)
        ]
 
     renderIntervalChart :: Set IntervalledNote ->
                            H.ParentHTML Query CG.Query Slot Aff
     renderIntervalChart intervals =
-      let aIntervals = A.fromFoldable intervals
+      let
+        aIntervals = A.fromFoldable intervals
+        scClass = case state.scalesOrChords of
+          Scales -> "on-scales"
+          Chords -> "on-chords"
       in
-       HH.div [ HP.class_ $ HH.ClassName "pure-menu restricted-width"]
-       [ HH.ul [ HP.class_ $ HH.ClassName "pure-menu-list intervals-chart"]
+       HH.div [ HP.class_ $ HH.ClassName ("pure-menu restricted-width " <> scClass)]
+       [ HH.ul [ HP.class_ $ HH.ClassName ("pure-menu-list intervals-chart " <> scClass)]
          (renderInterval <$> aIntervals)
        ]
 
@@ -291,29 +369,43 @@ guitarMap = T.taggedToMap G.allGuitars
 chordMap :: Map String Chord
 chordMap = T.taggedToMap C.allChords
 
+scaleMap :: Map String Scale
+scaleMap = T.taggedToMap Sc.allScales
+
 noteMap :: Map String Note
 noteMap = T.taggedToMap N.allNotes
 
-allGenChords :: Map String (Map String ThisChord)
-allGenChords =
+genAll :: forall a b.
+          (b -> RootedInterval) ->
+          (a -> Note -> b) ->
+          Array (T.Tagged a) ->
+          Map String (Map String RootedInterval)
+genAll transformer generator items =
    let
-     forChord :: T.Tagged Chord -> Tuple String (Map String ThisChord)
-     forChord chord =
+     forRI :: T.Tagged a -> Tuple String (Map String RootedInterval)
+     forRI ri =
        let
          notes :: List (T.Tagged Note)
          notes = L.fromFoldable N.allNotes
        in
-        Tuple (T.getName chord) (M.fromFoldable $ (\n -> Tuple (T.getName n) $ C.generateChord (T.getValue chord)(T.getValue n)) <$> notes)
+        Tuple (T.getName ri) (M.fromFoldable $ (\n -> Tuple (T.getName n) $ transformer $ generator (T.getValue ri)(T.getValue n)) <$> notes)
 
-     mapping :: List (Tuple String (Map String ThisChord))
+     mapping :: List (Tuple String (Map String RootedInterval))
      mapping =
        let
-         chords :: List (T.Tagged Chord)
-         chords = L.fromFoldable C.allChords
+         intervals :: List (T.Tagged a)
+         intervals = L.fromFoldable items
        in
-        forChord <$> chords
+        forRI <$> intervals
    in
     M.fromFoldable mapping
+
+
+allGenChords :: Map String (Map String RootedInterval)
+allGenChords = genAll fromChord C.generateChord C.allChords
+
+allGenScales :: Map String (Map String RootedInterval)
+allGenScales = genAll fromScale Sc.generateScale Sc.allScales
 
 eval :: Query ~> H.ParentDSL State Query CG.Query Slot Void Aff
 eval (ChangeGuitar name next) = do
@@ -326,21 +418,17 @@ eval (ChangeGuitar name next) = do
                    , selectedNotes = S.empty :: Set Note
                    })
       _ <- H.query (Slot name) $ H.request CG.ClearAll
-      thisChord <- H.gets getFilteredChord
-      case thisChord of
+      filtered <- H.gets getFiltered
+      case filtered of
         Nothing -> pure next
-        Just chord ->  do
-          _ <- H.query (Slot name) $ H.request (CG.ShowChord chord)
+        Just intervals ->  do
+          _ <- H.query (Slot name) $ H.request (CG.ShowNotes intervals)
           showColor <- H.gets (_.showColor)
           _ <- H.query (Slot name) $ H.request (CG.ShowColor showColor)
           pure next
 eval (ChangeChord name next) = do
   case M.lookup name chordMap of
-    Nothing -> do
-      H.modify_ (_ { currentChord = defaultOptionValue
-                   , filteredIntervals = emptyFilter
-                   })
-      pure next
+    Nothing -> pure next
     Just newChord -> do
       H.modify_ (_ { currentChord = name
                    , filteredIntervals = emptyFilter
@@ -350,30 +438,40 @@ eval (ChangeChord name next) = do
         Nothing -> pure next
         Just chord -> do
           slot <- H.gets (_.currentGuitar)
-          _ <- H.query (Slot slot) $ H.request (CG.ShowChord chord)
+          _ <- H.query (Slot slot) $ H.request (CG.ShowNotes chord)
+          pure next
+eval (ChangeScale name next) = do
+  case M.lookup name scaleMap of
+    Nothing -> pure next
+    Just newScale -> do
+      H.modify_ (_ { currentScale = name
+                   , filteredIntervals = emptyFilter
+                   })
+      thisScale <- H.gets getScale
+      case thisScale of
+        Nothing -> pure next
+        Just scale -> do
+          slot <- H.gets (_.currentGuitar)
+          _ <- H.query (Slot slot) $ H.request (CG.ShowNotes scale)
           pure next
 eval (ChangeNote name next) = do
   case M.lookup name noteMap of
-    Nothing -> do
-      H.modify_ (_ { currentNote = defaultOptionValue
-                   , filteredIntervals = emptyFilter
-                   })
-      pure next
+    Nothing -> pure next
     Just newNote -> do
       oldNote <- H.gets getNote
-      filteredIntervals <- H.gets (_.filteredIntervals)
+      intervals <- H.gets (_.filteredIntervals)
       let change = (flip N.noteDistance) newNote <$> oldNote
           newFilter =
-            maybe emptyFilter (\d -> S.map ((flip N.incNoteBy) d) filteredIntervals) change
+            maybe emptyFilter (\d -> S.map ((flip N.incNoteBy) d) intervals) change
       H.modify_ (_ { currentNote = name
                    , filteredIntervals = newFilter
                    })
-      thisChord <- H.gets getFilteredChord
-      case thisChord of
+      filtered <- H.gets getFiltered
+      case filtered of
         Nothing -> pure next
-        Just chord -> do
+        Just theseIntervals -> do
           slot <- H.gets (_.currentGuitar)
-          _ <- H.query (Slot slot) $ H.request (CG.ShowChord chord)
+          _ <- H.query (Slot slot) $ H.request (CG.ShowNotes theseIntervals)
           pure next
 eval (ToggleShowColor next) = do
   state <- H.get
@@ -382,22 +480,34 @@ eval (ToggleShowColor next) = do
   _ <- H.query (Slot state.currentGuitar) $ H.request (CG.ShowColor nowShow)
   pure next
 eval (ToggleInterval interval next) = do
-  filteredIntervals <- H.gets (_.filteredIntervals)
-  let newFilter = if S.member interval filteredIntervals
-                  then S.delete interval filteredIntervals
-                  else S.insert interval filteredIntervals
+  oldFilter <- H.gets (_.filteredIntervals)
+  let newFilter = if S.member interval oldFilter
+                  then S.delete interval oldFilter
+                  else S.insert interval oldFilter
   H.modify_ (_ { filteredIntervals = newFilter })
-  thisChord <- H.gets getFilteredChord
-  case thisChord of
-    Just chord -> do
-      slot <- H.gets (_.currentGuitar)
-      _ <- H.query (Slot slot) $ H.request (CG.ShowChord chord)
-      pure next
+  filtered <- H.gets getFiltered
+  case filtered of
     Nothing -> pure next
+    Just intervals -> do
+      slot <- H.gets (_.currentGuitar)
+      _ <- H.query (Slot slot) $ H.request (CG.ShowNotes intervals)
+      pure next
 eval (ToggleSidebar next) = do
   showSidebar <- H.gets (_.showSidebar)
   H.modify_ (_ { showSidebar = not showSidebar })
   pure next
+eval (ToggleScalesChords next) = do
+  scalesChords <- H.gets (_.scalesOrChords)
+  let newSC = flipUsing scalesChords
+  H.modify_ (_ { scalesOrChords = newSC })
+  _ <- H.liftEffect $ setCookie scaleChordCookie (scaleChordToString newSC)
+  filtered <- H.gets getFiltered
+  case filtered of
+    Nothing -> pure next
+    Just theseIntervals -> do
+      slot <- H.gets (_.currentGuitar)
+      _ <- H.query (Slot slot) $ H.request (CG.ShowNotes theseIntervals)
+      pure next
 eval (ClearSelected next) = do
   state <- H.get
   _ <- H.query (Slot state.currentGuitar) $ H.request CG.ClearToggled
