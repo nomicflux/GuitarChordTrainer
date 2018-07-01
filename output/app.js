@@ -10247,14 +10247,17 @@ var PS = {};
       };
       return Scale;
   })();
+  var wholetone = new Scale(Data_List.fromFoldable(Data_Foldable.foldableArray)([ Interval.majorSecond, Interval.majorSecond, Interval.majorSecond, Interval.majorSecond, Interval.majorSecond, Interval.majorSecond ]));
   var phrygian = new Scale(Data_List.fromFoldable(Data_Foldable.foldableArray)([ Interval.minorSecond, Interval.majorSecond, Interval.majorSecond, Interval.majorSecond, Interval.minorSecond, Interval.majorSecond, Interval.majorSecond ]));
   var mixolydian = new Scale(Data_List.fromFoldable(Data_Foldable.foldableArray)([ Interval.majorSecond, Interval.majorSecond, Interval.majorSecond, Interval.minorSecond, Interval.majorSecond, Interval.majorSecond, Interval.minorSecond ]));
   var minorScale = new Scale(Data_List.fromFoldable(Data_Foldable.foldableArray)([ Interval.majorSecond, Interval.minorSecond, Interval.majorSecond, Interval.majorSecond, Interval.minorSecond, Interval.majorSecond, Interval.majorSecond ]));
   var minorPentatonic = new Scale(Data_List.fromFoldable(Data_Foldable.foldableArray)([ Interval.minorThird, Interval.majorSecond, Interval.majorSecond, Interval.minorThird ]));
+  var melodicMinorScale = new Scale(Data_List.fromFoldable(Data_Foldable.foldableArray)([ Interval.majorSecond, Interval.minorSecond, Interval.majorSecond, Interval.majorSecond, Interval.minorSecond, Interval.minorThird, Interval.majorSecond ]));
   var majorScale = new Scale(Data_List.fromFoldable(Data_Foldable.foldableArray)([ Interval.majorSecond, Interval.majorSecond, Interval.minorSecond, Interval.majorSecond, Interval.majorSecond, Interval.majorSecond, Interval.minorSecond ]));
   var majorPentatonic = new Scale(Data_List.fromFoldable(Data_Foldable.foldableArray)([ Interval.majorSecond, Interval.majorSecond, Interval.minorThird, Interval.minorThird ]));
   var lydian = new Scale(Data_List.fromFoldable(Data_Foldable.foldableArray)([ Interval.majorSecond, Interval.majorSecond, Interval.minorSecond, Interval.majorSecond, Interval.majorSecond, Interval.minorSecond, Interval.majorSecond ]));
   var locrian = new Scale(Data_List.fromFoldable(Data_Foldable.foldableArray)([ Interval.minorSecond, Interval.majorSecond, Interval.majorSecond, Interval.minorSecond, Interval.majorSecond, Interval.majorSecond, Interval.majorSecond ]));
+  var harmonicMinorScale = new Scale(Data_List.fromFoldable(Data_Foldable.foldableArray)([ Interval.majorSecond, Interval.minorSecond, Interval.majorSecond, Interval.majorSecond, Interval.minorSecond, Interval.minorThird, Interval.minorSecond ]));
   var generateScaleHelper = function (v) {
       return function (note) {
           if (v.value0 instanceof Data_List_Types.Nil) {
@@ -10264,7 +10267,7 @@ var PS = {};
               var nextNote = Note.incNoteBy(note)(v.value0.value0);
               return new Data_List_Types.Cons(note, generateScaleHelper(new Scale(v.value0.value1))(nextNote));
           };
-          throw new Error("Failed pattern match at Scale line 113, column 1 - line 113, column 50: " + [ v.constructor.name, note.constructor.name ]);
+          throw new Error("Failed pattern match at Scale line 176, column 1 - line 176, column 50: " + [ v.constructor.name, note.constructor.name ]);
       };
   };
   var generateScale = function (scaleIntervals) {
@@ -10275,8 +10278,11 @@ var PS = {};
           };
       };
   };
+  var fullyDiminished = new Scale(Data_List.fromFoldable(Data_Foldable.foldableArray)([ Interval.majorSecond, Interval.minorSecond, Interval.majorSecond, Interval.minorSecond, Interval.majorSecond, Interval.minorSecond, Interval.majorSecond ]));
   var dorian = new Scale(Data_List.fromFoldable(Data_Foldable.foldableArray)([ Interval.majorSecond, Interval.minorSecond, Interval.majorSecond, Interval.majorSecond, Interval.majorSecond, Interval.minorSecond, Interval.majorSecond ]));
-  var allScales = [ new Tagged.Tagged("Major / Ionic", majorScale), new Tagged.Tagged("Dorian", dorian), new Tagged.Tagged("Phrygian", phrygian), new Tagged.Tagged("Mixolydian", mixolydian), new Tagged.Tagged("Lydian", lydian), new Tagged.Tagged("Minor / Aeolian", minorScale), new Tagged.Tagged("Locrian", locrian), new Tagged.Tagged("Minor Pentatonic", minorPentatonic), new Tagged.Tagged("Major Pentatonic", majorPentatonic) ];
+  var domDiminished = new Scale(Data_List.fromFoldable(Data_Foldable.foldableArray)([ Interval.minorSecond, Interval.majorSecond, Interval.minorSecond, Interval.majorSecond, Interval.minorSecond, Interval.majorSecond, Interval.minorSecond ]));
+  var blues = new Scale(Data_List.fromFoldable(Data_Foldable.foldableArray)([ Interval.minorThird, Interval.majorSecond, Interval.minorSecond, Interval.minorSecond, Interval.minorThird ]));
+  var allScales = [ new Tagged.Tagged("Major / Ionic", majorScale), new Tagged.Tagged("Dorian", dorian), new Tagged.Tagged("Phrygian", phrygian), new Tagged.Tagged("Mixolydian", mixolydian), new Tagged.Tagged("Lydian", lydian), new Tagged.Tagged("Minor / Aeolian", minorScale), new Tagged.Tagged("Locrian", locrian), new Tagged.Tagged("Minor Pentatonic", minorPentatonic), new Tagged.Tagged("Major Pentatonic", majorPentatonic), new Tagged.Tagged("Blues", blues), new Tagged.Tagged("Melodic Minor", melodicMinorScale), new Tagged.Tagged("Harmonic Minor", harmonicMinorScale), new Tagged.Tagged("Fully Diminished", fullyDiminished), new Tagged.Tagged("Dominant Diminished", domDiminished), new Tagged.Tagged("Wholetone", wholetone) ];
   exports["Scale"] = Scale;
   exports["majorScale"] = majorScale;
   exports["dorian"] = dorian;
@@ -10287,6 +10293,12 @@ var PS = {};
   exports["locrian"] = locrian;
   exports["minorPentatonic"] = minorPentatonic;
   exports["majorPentatonic"] = majorPentatonic;
+  exports["blues"] = blues;
+  exports["fullyDiminished"] = fullyDiminished;
+  exports["domDiminished"] = domDiminished;
+  exports["wholetone"] = wholetone;
+  exports["melodicMinorScale"] = melodicMinorScale;
+  exports["harmonicMinorScale"] = harmonicMinorScale;
   exports["allScales"] = allScales;
   exports["generateScaleHelper"] = generateScaleHelper;
   exports["generateScale"] = generateScale;
@@ -11471,7 +11483,8 @@ var PS = {};
   exports["ordSlot"] = ordSlot;
 })(PS["Component.Guitar"] = PS["Component.Guitar"] || {});
 (function(exports) {
-    "use strict";
+  // Generated by purs version 0.12.0
+  "use strict";
   var Chord = PS["Chord"];
   var Component_Common_Constants = PS["Component.Common.Constants"];
   var Component_Common_Cookie = PS["Component.Common.Cookie"];

@@ -94,6 +94,63 @@ majorPentatonic = Scale (fromFoldable [ I.majorSecond
                                       , I.minorThird
                                       ])
 
+blues :: Scale
+blues = Scale (fromFoldable [ I.minorThird
+                            , I.majorSecond
+                            , I.minorSecond
+                            , I.minorSecond
+                            , I.minorThird
+                            ])
+
+fullyDiminished :: Scale
+fullyDiminished = Scale (fromFoldable [ I.majorSecond
+                                      , I.minorSecond
+                                      , I.majorSecond
+                                      , I.minorSecond
+                                      , I.majorSecond
+                                      , I.minorSecond
+                                      , I.majorSecond
+                                      ])
+
+domDiminished :: Scale
+domDiminished = Scale (fromFoldable [ I.minorSecond
+                                    , I.majorSecond
+                                    , I.minorSecond
+                                    , I.majorSecond
+                                    , I.minorSecond
+                                    , I.majorSecond
+                                    , I.minorSecond
+                                    ])
+
+wholetone :: Scale
+wholetone = Scale (fromFoldable [ I.majorSecond
+                                , I.majorSecond
+                                , I.majorSecond
+                                , I.majorSecond
+                                , I.majorSecond
+                                , I.majorSecond
+                                ])
+
+melodicMinorScale :: Scale
+melodicMinorScale = Scale (fromFoldable [ I.majorSecond
+                                        , I.minorSecond
+                                        , I.majorSecond
+                                        , I.majorSecond
+                                        , I.minorSecond
+                                        , I.minorThird
+                                        , I.majorSecond
+                                        ])
+
+harmonicMinorScale :: Scale
+harmonicMinorScale = Scale (fromFoldable [ I.majorSecond
+                                         , I.minorSecond
+                                         , I.majorSecond
+                                         , I.majorSecond
+                                         , I.minorSecond
+                                         , I.minorThird
+                                         , I.minorSecond
+                                         ])
+
 allScales :: Array (Tagged Scale)
 allScales = [ Tagged "Major / Ionic" majorScale
             , Tagged "Dorian" dorian
@@ -104,6 +161,12 @@ allScales = [ Tagged "Major / Ionic" majorScale
             , Tagged "Locrian" locrian
             , Tagged "Minor Pentatonic" minorPentatonic
             , Tagged "Major Pentatonic" majorPentatonic
+            , Tagged "Blues" blues
+            , Tagged "Melodic Minor" melodicMinorScale
+            , Tagged "Harmonic Minor" harmonicMinorScale
+            , Tagged "Fully Diminished" fullyDiminished
+            , Tagged "Dominant Diminished" domDiminished
+            , Tagged "Wholetone" wholetone
             ]
 
 type ThisScale = { rootNote :: Note
