@@ -46,7 +46,8 @@ flipUsing Chords = Scales
 type State = { currentGuitar :: String
              , currentChord :: String
              , currentScale :: String
-             , currentNote :: String
+             , currentChordNote :: String
+             , currentScaleNote :: String
              , showColor :: Boolean
              , filteredIntervals :: Set Note
              , selectedNotes :: Set Note
@@ -81,7 +82,8 @@ initialState input =
    { currentGuitar: fromMaybe defaultOptionValue mguitar
    , currentChord: defaultOptionValue
    , currentScale: defaultOptionValue
-   , currentNote: defaultOptionValue
+   , currentChordNote: defaultOptionValue
+   , currentScaleNote: defaultOptionValue
    , showColor: true
    , filteredIntervals: emptyFilter
    , selectedNotes: emptyFilter
@@ -90,15 +92,18 @@ initialState input =
    }
 
 getNote :: State -> Maybe Note
-getNote state = M.lookup state.currentNote noteMap
+getNote state =
+  case state.scalesOrChords of
+    Scales -> M.lookup state.currentScaleNote noteMap
+    Chords -> M.lookup state.currentChordNote noteMap
 
 getChord :: State -> Maybe RootedInterval
 getChord state =
-  M.lookup state.currentChord allGenChords >>= M.lookup state.currentNote
+  M.lookup state.currentChord allGenChords >>= M.lookup state.currentChordNote
 
 getScale :: State -> Maybe RootedInterval
 getScale state =
-  M.lookup state.currentScale allGenScales >>= M.lookup state.currentNote
+  M.lookup state.currentScale allGenScales >>= M.lookup state.currentScaleNote
 
 getFilteredChord :: State -> Maybe RootedInterval
 getFilteredChord state =
@@ -225,6 +230,10 @@ render state =
             case state.scalesOrChords of
               Scales -> state.currentScale
               Chords -> state.currentChord
+          currentNote =
+            case state.scalesOrChords of
+              Scales -> state.currentScaleNote
+              Chords -> state.currentChordNote
       in
        HH.div [ HP.class_ $ HH.ClassName "select-div" ]
        [ mkSelect tuningRefName guitarMap (M.keys guitarMap) state.currentGuitar ChangeGuitar
@@ -233,7 +242,7 @@ render state =
            mkSelect scaleRefName scaleMap (filteredScales state.selectedNotes) state.currentScale ChangeScale
          Chords ->
            mkSelect chordRefName chordMap (filteredChords state.selectedNotes) state.currentChord ChangeChord
-       , mkSelect noteRefName noteMap (filteredNotes noteGetter noteSource state.selectedNotes) state.currentNote ChangeNote
+       , mkSelect noteRefName noteMap (filteredNotes noteGetter noteSource state.selectedNotes) currentNote ChangeNote
        ]
 
     renderButtons :: H.ParentHTML Query CG.Query Slot Aff
@@ -459,13 +468,15 @@ eval (ChangeNote name next) = do
     Nothing -> pure next
     Just newNote -> do
       oldNote <- H.gets getNote
-      intervals <- H.gets (_.filteredIntervals)
+      state <- H.get
       let change = (flip N.noteDistance) newNote <$> oldNote
           newFilter =
-            maybe emptyFilter (\d -> S.map ((flip N.incNoteBy) d) intervals) change
-      H.modify_ (_ { currentNote = name
-                   , filteredIntervals = newFilter
-                   })
+            maybe emptyFilter (\d -> S.map ((flip N.incNoteBy) d) state.filteredIntervals) change
+      case state.scalesOrChords of
+        Scales ->
+          H.modify_ (_ { currentScaleNote = name, filteredIntervals = newFilter })
+        Chords ->
+          H.modify_ (_ { currentChordNote = name, filteredIntervals = newFilter })
       filtered <- H.gets getFiltered
       case filtered of
         Nothing -> pure next
@@ -517,7 +528,9 @@ eval (ClearAll next) = do
   slot <- H.gets (_.currentGuitar)
   _ <- H.query (Slot slot) $ H.request CG.ClearAll
   H.modify_ ( _ { currentChord = defaultOptionValue
-                , currentNote = defaultOptionValue
+                , currentScale = defaultOptionValue
+                , currentChordNote = defaultOptionValue
+                , currentScaleNote = defaultOptionValue
                 , selectedNotes = emptyFilter
                 , filteredIntervals = emptyFilter
                 })
