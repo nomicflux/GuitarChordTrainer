@@ -32,3 +32,6 @@ bodyRef = H.RefLabel "MainBody"
 
 guitarCookie :: String
 guitarCookie = "guitar"
+
+scaleChordCookie :: String
+scaleChordCookie = "scale-or-chord"

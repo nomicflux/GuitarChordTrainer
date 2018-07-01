@@ -18,7 +18,7 @@ import Data.List (List)
 import Data.List as L
 import Data.Map (Map)
 import Data.Map as M
-import Data.Maybe (Maybe(..), maybe)
+import Data.Maybe (Maybe(..), fromMaybe, maybe)
 import Data.Set (Set)
 import Data.Set as S
 import Data.Tuple (Tuple(..))
@@ -34,14 +34,17 @@ import Note (Note)
 import Note as N
 import Tagged as T
 
-type State = { currentGuitar :: Guitar
+data Using = Scales | Chords
+
+type State = { currentGuitar :: String
              , currentChord :: String
+             , currentScale :: String
              , currentNote :: String
-             , slot :: String
              , showColor :: Boolean
              , filteredIntervals :: Set Note
              , selectedNotes :: Set Note
              , showSidebar :: Boolean
+             , scalesOrChords :: Using
              }
 
 defaultOptionValue :: String
@@ -50,23 +53,29 @@ defaultOptionValue = ""
 emptyFilter :: Set Note
 emptyFilter = S.empty
 
-initialState :: Maybe String -> State
-initialState cookieGuitar =
+type Input = { guitar :: Maybe String
+             , scalesOrChords :: Maybe String
+             }
+
+scaleChordFromString :: String -> Maybe Using
+scaleChordFromString "scale" = Just Scales
+scaleChordFromString "chord" = Just Chords
+scaleChordFromString _ = Nothing
+
+initialState :: Input -> State
+initialState input =
   let
-    mcookie = do
-      name <- cookieGuitar
-      guitar <- M.lookup name guitarMap
-      pure $ T.Tagged name guitar
-    mguitar = mcookie <|> G.allGuitars !! 0
+    mguitar = input.guitar <|> (T.getName <$> G.allGuitars !! 0)
   in
-   { currentGuitar: maybe G.standardGuitar T.getValue mguitar
+   { currentGuitar: fromMaybe defaultOptionValue mguitar
    , currentChord: defaultOptionValue
+   , currentScale: defaultOptionValue
    , currentNote: defaultOptionValue
-   , slot: maybe defaultOptionValue T.getName mguitar
    , showColor: true
    , filteredIntervals: emptyFilter
    , selectedNotes: emptyFilter
    , showSidebar: false
+   , scalesOrChords: fromMaybe Scales $ input.scalesOrChords >>= scaleChordFromString
    }
 
 getNote :: State -> Maybe Note
@@ -94,7 +103,7 @@ data Slot = Slot String
 derive instance eqSlot :: Eq Slot
 derive instance ordSlot :: Ord Slot
 
-component :: H.Component HH.HTML Query (Maybe String) Void Aff
+component :: H.Component HH.HTML Query Input Void Aff
 component =
   H.parentComponent
   { initialState: initialState
@@ -147,10 +156,15 @@ render :: State -> H.ParentHTML Query CG.Query Slot Aff
 render state =
   HH.div [ HP.class_ $ HH.ClassName "pure-g" ]
   [ renderSidebar
-  ,  HH.div [ HP.class_ $ HH.ClassName "pure-u-1 pure-u-md-1-2 pure-u-lg-2-3 guitar-container" ]
-     [ HH.slot (Slot state.slot) CG.component state.currentGuitar $ HE.input HandleGuitar ]
+  , HH.div [ HP.class_ $ HH.ClassName "pure-u-1 pure-u-md-1-2 pure-u-lg-2-3 guitar-container"
+            ] renderGuitar
   ]
   where
+    renderGuitar :: Array (H.ParentHTML Query CG.Query Slot Aff)
+    renderGuitar =
+      let mguitar = M.lookup state.currentGuitar guitarMap
+      in maybe [] (\g -> [ HH.slot (Slot state.currentGuitar) CG.component g (HE.input HandleGuitar) ]) mguitar
+
     renderSidebarToggle :: H.ParentHTML Query CG.Query Slot Aff
     renderSidebarToggle =
       HH.div [ HE.onClick $ HE.input_ ToggleSidebar
@@ -161,7 +175,7 @@ render state =
     renderSelects :: H.ParentHTML Query CG.Query Slot Aff
     renderSelects =
       HH.div [ HP.class_ $ HH.ClassName "select-div" ]
-      [ mkSelect tuningRefName guitarMap (M.keys guitarMap) state.slot ChangeGuitar
+      [ mkSelect tuningRefName guitarMap (M.keys guitarMap) state.currentGuitar ChangeGuitar
       , mkSelect chordRefName chordMap (filteredChords state.selectedNotes) state.currentChord ChangeChord
       , mkSelect noteRefName noteMap (filteredNotes state.currentChord state.selectedNotes) state.currentNote ChangeNote
       ]
@@ -308,8 +322,7 @@ eval (ChangeGuitar name next) = do
     Nothing -> pure next
     Just guitar -> do
       _ <- H.liftEffect $ setCookie guitarCookie name
-      H.modify_ (_ { currentGuitar = guitar
-                   , slot = name
+      H.modify_ (_ { currentGuitar = name
                    , selectedNotes = S.empty :: Set Note
                    })
       _ <- H.query (Slot name) $ H.request CG.ClearAll
@@ -336,7 +349,7 @@ eval (ChangeChord name next) = do
       case thisChord of
         Nothing -> pure next
         Just chord -> do
-          slot <- H.gets (_.slot)
+          slot <- H.gets (_.currentGuitar)
           _ <- H.query (Slot slot) $ H.request (CG.ShowChord chord)
           pure next
 eval (ChangeNote name next) = do
@@ -359,14 +372,14 @@ eval (ChangeNote name next) = do
       case thisChord of
         Nothing -> pure next
         Just chord -> do
-          slot <- H.gets (_.slot)
+          slot <- H.gets (_.currentGuitar)
           _ <- H.query (Slot slot) $ H.request (CG.ShowChord chord)
           pure next
 eval (ToggleShowColor next) = do
   state <- H.get
   let nowShow = not state.showColor
   H.modify_ (_ { showColor = nowShow })
-  _ <- H.query (Slot state.slot) $ H.request (CG.ShowColor nowShow)
+  _ <- H.query (Slot state.currentGuitar) $ H.request (CG.ShowColor nowShow)
   pure next
 eval (ToggleInterval interval next) = do
   filteredIntervals <- H.gets (_.filteredIntervals)
@@ -377,7 +390,7 @@ eval (ToggleInterval interval next) = do
   thisChord <- H.gets getFilteredChord
   case thisChord of
     Just chord -> do
-      slot <- H.gets (_.slot)
+      slot <- H.gets (_.currentGuitar)
       _ <- H.query (Slot slot) $ H.request (CG.ShowChord chord)
       pure next
     Nothing -> pure next
@@ -387,11 +400,11 @@ eval (ToggleSidebar next) = do
   pure next
 eval (ClearSelected next) = do
   state <- H.get
-  _ <- H.query (Slot state.slot) $ H.request CG.ClearToggled
+  _ <- H.query (Slot state.currentGuitar) $ H.request CG.ClearToggled
   H.modify_ ( _ { selectedNotes = S.empty :: Set Note })
   pure next
 eval (ClearAll next) = do
-  slot <- H.gets (_.slot)
+  slot <- H.gets (_.currentGuitar)
   _ <- H.query (Slot slot) $ H.request CG.ClearAll
   H.modify_ ( _ { currentChord = defaultOptionValue
                 , currentNote = defaultOptionValue
