@@ -1,4 +1,4 @@
-module Component.SVG where
+module Component.Common.SVG where
 
 import Halogen.HTML (AttrName(..), ElemName(..), HTML, Namespace(..))
 import Halogen.HTML.Elements (elementNS)

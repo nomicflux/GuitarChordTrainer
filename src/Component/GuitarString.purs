@@ -3,9 +3,9 @@ module Component.GuitarString where
 import Prelude
 
 import Chord (ThisChord)
-import Component.Constants (halfFretHeight, halfFretWidth, lineHeight, pushedFretRadius)
-import Component.FretColor (fretColor)
-import Component.SVG as SVG
+import Component.Common.Constants (halfFretHeight, halfFretWidth, lineHeight, pushedFretRadius)
+import Component.Common.FretColor (fretColor)
+import Component.Common.SVG as SVG
 import Data.Array ((:))
 import Data.Array as A
 import Data.List (List)

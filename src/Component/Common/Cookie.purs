@@ -1,4 +1,4 @@
-module Component.Cookie where
+module Component.Common.Cookie where
 
 import Data.Function.Uncurried (Fn2, runFn2)
 import Data.Maybe (Maybe)

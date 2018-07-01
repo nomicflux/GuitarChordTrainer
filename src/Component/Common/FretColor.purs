@@ -1,4 +1,4 @@
-module Component.FretColor where
+module Component.Common.FretColor where
 
 import Color as Color
 import Data.Int (toNumber)

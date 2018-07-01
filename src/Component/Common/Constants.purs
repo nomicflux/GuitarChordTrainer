@@ -1,4 +1,4 @@
-module Component.Constants where
+module Component.Common.Constants where
 
 import Halogen as H
 import Prelude ((*), (+), (/))

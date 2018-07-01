@@ -5,12 +5,12 @@ import Prelude
 import Chord (Chord, IntervalledNote, ThisChord)
 import Chord as C
 import Chord as I
-import Component.Constants (guitarCookie, pushedFretRadius)
-import Component.Cookie (setCookie)
-import Component.FontAwesome (icon)
-import Component.FretColor (fretColor)
+import Component.Common.Constants (guitarCookie, pushedFretRadius)
+import Component.Common.Cookie (setCookie)
+import Component.Common.FontAwesome (icon)
+import Component.Common.FretColor (fretColor)
+import Component.Common.SVG as SVG
 import Component.Guitar as CG
-import Component.SVG as SVG
 import Control.Alt ((<|>))
 import Data.Array ((!!), (:))
 import Data.Array as A

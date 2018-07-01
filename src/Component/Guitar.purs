@@ -3,11 +3,11 @@ module Component.Guitar where
 import Prelude
 
 import Chord (ThisChord)
-import Component.Constants (fretHeight, fretMarkerRadius, fretWidth, halfFretHeight, lineHeight, stringLength)
+import Component.Common.Constants (fretHeight, fretMarkerRadius, fretWidth, halfFretHeight, lineHeight, stringLength)
+import Component.Common.Communication (passAlong, getBack)
+import Component.Common.SVG as SVG
+import Component.Common.Offset (getOffset)
 import Component.GuitarString as GS
-import Component.Helpers (passAlong, getBack)
-import Component.SVG as SVG
-import Component.Scroll (getOffset)
 import Data.Array as A
 import Data.Int (round, toNumber)
 import Data.Maybe (Maybe(..), fromMaybe)

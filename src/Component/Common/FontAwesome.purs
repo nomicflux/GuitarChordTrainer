@@ -1,4 +1,4 @@
-module Component.FontAwesome where
+module Component.Common.FontAwesome where
 
 import Halogen.HTML as HH
 import Halogen.HTML.Properties as HP

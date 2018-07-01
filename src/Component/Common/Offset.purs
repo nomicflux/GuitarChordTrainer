@@ -1,4 +1,4 @@
-module Component.Scroll where
+module Component.Common.Offset where
 
 import Effect (Effect)
 import Web.DOM.Element (Element)

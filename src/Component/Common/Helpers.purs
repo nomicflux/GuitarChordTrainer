@@ -1,4 +1,4 @@
-module Component.Helpers where
+module Component.Common.Communication where
 
 import Prelude
 
