@@ -12108,6 +12108,7 @@ var PS = {};
                       };
                   };
                   $159.scalesOrChords = newSC;
+                  $159.filteredIntervals = emptyFilter;
                   return $159;
               }))(function () {
                   return Control_Bind.bind(Halogen_Query_HalogenM.bindHalogenM)(Effect_Class.liftEffect(Halogen_Query_HalogenM.monadEffectHalogenM(Effect_Aff.monadEffectAff))(Component_Common_Cookie.setCookie(Component_Common_Constants.scaleChordCookie)(scaleChordToString(newSC))))(function (v2) {
@@ -12124,7 +12125,7 @@ var PS = {};
                                   });
                               });
                           };
-                          throw new Error("Failed pattern match at Component.App line 516, column 3 - line 521, column 16: " + [ v3.constructor.name ]);
+                          throw new Error("Failed pattern match at Component.App line 518, column 3 - line 523, column 16: " + [ v3.constructor.name ]);
                       });
                   });
               });

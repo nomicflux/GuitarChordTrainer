@@ -510,7 +510,9 @@ eval (ToggleSidebar next) = do
 eval (ToggleScalesChords next) = do
   scalesChords <- H.gets (_.scalesOrChords)
   let newSC = flipUsing scalesChords
-  H.modify_ (_ { scalesOrChords = newSC })
+  H.modify_ (_ { scalesOrChords = newSC
+               , filteredIntervals = emptyFilter
+               })
   _ <- H.liftEffect $ setCookie scaleChordCookie (scaleChordToString newSC)
   filtered <- H.gets getFiltered
   case filtered of
