@@ -91,7 +91,7 @@ majorPentatonic :: Scale
 majorPentatonic = Scale (fromFoldable [ I.majorSecond
                                       , I.majorSecond
                                       , I.minorThird
-                                      , I.minorThird
+                                      , I.majorSecond
                                       ])
 
 blues :: Scale
