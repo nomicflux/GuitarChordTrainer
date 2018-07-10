@@ -97,6 +97,10 @@ body {
     display: none;
 }
 
+.guitar {
+    display: inline-block;
+}
+
 @keyframes sidebar-extend {
     from {
         width: 10%;
