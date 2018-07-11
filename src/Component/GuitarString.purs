@@ -67,6 +67,7 @@ data Query a = ToggleFret Int (Unit -> a)
              | PushNotes RootedInterval (Unit -> a)
              | ShowColor Boolean (Unit -> a)
              | GetNotes (Set Note -> a)
+             | SelectNotes (Set Note) (Unit -> a)
              | ResetNotes (Unit -> a)
              | ResetToggled (Unit -> a)
 
@@ -175,6 +176,12 @@ eval = case _ of
     state <- H.get
     let notes = S.map (\fret -> N.incNoteBy state.string.baseNote fret) state.toggled
     pure $ reply notes
+  SelectNotes notes reply -> do
+    state <- H.get
+    let
+      positions = L.concatMap ((map getFret) <<< getNotePositions state.string state.string.baseNote) (L.fromFoldable notes)
+    H.modify_ (_ { toggled = S.fromFoldable positions })
+    pure $ reply unit
   ResetNotes next -> do
     H.modify_ (_ { frets = S.empty :: Set FrettedNote })
     pure $ next unit

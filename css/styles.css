@@ -101,6 +101,14 @@ body {
     display: inline-block;
 }
 
+.guitar-current {
+}
+
+.guitar-snapshot .guitar {
+    background: #EEE;
+    border-radius: 5px;
+}
+
 @keyframes sidebar-extend {
     from {
         width: 10%;

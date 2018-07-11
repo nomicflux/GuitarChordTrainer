@@ -31,6 +31,7 @@ data Query a = ShowNotes RootedInterval (Unit -> a)
              | ClearToggled (Unit -> a)
              | ClearAll (Unit -> a)
              | GetNotes (Set Note -> a)
+             | SelectNotes (Set Note) (Unit -> a)
              | HandleString Int GuitarString a
 
 data Slot = Slot Int
@@ -153,6 +154,9 @@ eval (ClearAll next) = do
   _ <- passAlong GS.ResetNotes
   _ <- passAlong GS.ResetToggled
   pure $ next unit
+eval (SelectNotes notes reply) = do
+  _ <- passAlong (GS.SelectNotes notes)
+  pure $ reply unit
 eval (GetNotes reply) = do
   allNotes <- getBack (\acc these -> S.union acc (fromMaybe S.empty these)) S.empty GS.GetNotes
   pure $ reply allNotes

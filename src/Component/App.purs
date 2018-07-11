@@ -213,15 +213,18 @@ render state =
   HH.div [ HP.class_ $ HH.ClassName "pure-g" ]
   [ renderSidebar
   , HH.div [ HP.class_ $ HH.ClassName "pure-u-1 pure-u-md-2-3 pure-u-lg-3-4 guitar-container"
-            ] $ A.concatMap renderGuitar (A.range state.snapshotId 0)
+            ] $ renderGuitar <$> (A.range state.snapshotId 0)
   ]
   where
-    renderGuitar :: Int -> Array (H.ParentHTML Query CG.Query Slot Aff)
+    renderGuitar :: Int -> H.ParentHTML Query CG.Query Slot Aff
     renderGuitar snapshot =
       let
         atSnapshot = fromMaybe defaultOptionValue (state.snapshotGuitars !! snapshot)
         mguitar = M.lookup atSnapshot guitarMap
-      in maybe [] (\g -> [ HH.slot (Slot snapshot atSnapshot) CG.component g (HE.input HandleGuitar) ]) mguitar
+        currentClass = if snapshot == state.snapshotId then "guitar-current" else "guitar-snapshot"
+      in
+       HH.span [ HP.class_ $ HH.ClassName currentClass ] $
+       maybe [] (\g -> [ HH.slot (Slot snapshot atSnapshot) CG.component g (HE.input HandleGuitar) ]) mguitar
 
     renderSidebarToggle :: H.ParentHTML Query CG.Query Slot Aff
     renderSidebarToggle =
@@ -549,9 +552,7 @@ eval (ClearSelected next) = do
   H.modify_ ( _ { selectedNotes = S.empty :: Set Note })
   pure next
 eval (ClearAll next) = do
-  slot <- H.gets getSlot
   guitar <- H.gets getCurrentGuitar
-  _ <- H.query slot $ H.request CG.ClearAll
   H.modify_ ( _ { currentChord = defaultOptionValue
                 , currentScale = defaultOptionValue
                 , currentChordNote = defaultOptionValue
@@ -561,9 +562,12 @@ eval (ClearAll next) = do
                 , snapshotId = 0
                 , snapshotGuitars = [guitar]
                 })
+  slot <- H.gets getSlot
+  _ <- H.query slot $ H.request CG.ClearAll
   pure next
 eval (TakeSnapshot next) = do
   state <- H.get
+  _ <- H.query (getSlot state) $ H.request CG.ClearToggled
   let current = getCurrentGuitar state
   H.modify_ (_ { snapshotId = state.snapshotId + 1
                , snapshotGuitars = A.snoc state.snapshotGuitars current
